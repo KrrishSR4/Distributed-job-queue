@@ -1,0 +1,37 @@
+# Compiled output & caches
+/1-client/dist
+/1-client/tmp
+/1-client/out-tsc
+/1-client/.angular/cache
+
+# Dependencies
+/1-client/node_modules
+npm-debug.log
+yarn-error.log
+
+# Go binaries & build artifacts
+/2-server/bin
+/2-server/main
+*.exe
+*.exe~
+*.dll
+*.so
+*.dylib
+
+# Environment & local config
+.env
+.env.local
+*.log
+
+# IDEs and editors
+.idea/
+.vscode/*
+!.vscode/settings.json
+!.vscode/tasks.json
+!.vscode/launch.json
+!.vscode/extensions.json
+.history/*
+
+# OS generated files
+.DS_Store
+Thumbs.db

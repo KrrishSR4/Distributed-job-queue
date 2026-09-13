@@ -1,0 +1,39 @@
+version: '3.8'
+
+services:
+  # Phase 1: Frontend Client
+  client:
+    build:
+      context: ./1-client
+      dockerfile: Dockerfile
+    ports:
+      - "4200:4200"
+    environment:
+      - NODE_ENV=development
+
+  # Phase 2: Go Backend API (Placeholder)
+  # server:
+  #   build:
+  #     context: ./2-server
+  #     dockerfile: Dockerfile
+  #   ports:
+  #     - "8080:8080"
+  #   depends_on:
+  #     - redis
+  #     - postgres
+
+  # Phase 2: Redis Job Broker (Placeholder)
+  # redis:
+  #   image: redis:7-alpine
+  #   ports:
+  #     - "6379:6379"
+
+  # Phase 2: PostgreSQL Database (Placeholder)
+  # postgres:
+  #   image: postgres:16-alpine
+  #   environment:
+  #     POSTGRES_USER: djq
+  #     POSTGRES_PASSWORD: djqpassword
+  #     POSTGRES_DB: djq_db
+  #   ports:
+  #     - "5432:5432"
