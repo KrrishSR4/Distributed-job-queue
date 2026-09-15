@@ -16,12 +16,9 @@ import { DlqService } from '../../../services/dlq.service.js';
       <!-- Logo / Brand Header -->
       <div class="h-14 flex items-center justify-between px-4 border-b border-slate-200/80 dark:border-slate-800">
         <a routerLink="/" class="flex items-center gap-2.5 overflow-hidden group cursor-pointer" title="Go to Landing Page">
-          <div class="w-7 h-7 rounded-lg bg-blue-600 flex items-center justify-center flex-shrink-0 text-white font-bold font-mono text-xs shadow-xs group-hover:bg-blue-700 transition-colors">
-            JQ
-          </div>
           <div *ngIf="!collapsed" class="flex flex-col min-w-0">
-            <span class="text-xs font-bold text-slate-900 dark:text-slate-100 tracking-tight whitespace-nowrap group-hover:text-blue-600 transition-colors">JobQueue HQ</span>
-            <span class="text-[10px] text-slate-400 font-mono tracking-wide uppercase">v1.4.0 • Enterprise</span>
+            <span class="text-sm font-extrabold text-slate-900 dark:text-slate-100 tracking-tight whitespace-nowrap group-hover:text-blue-600 transition-colors">JobQueue</span>
+            <span class="text-[10px] text-slate-400 font-mono tracking-wide uppercase">Enterprise Engine</span>
           </div>
         </a>
 

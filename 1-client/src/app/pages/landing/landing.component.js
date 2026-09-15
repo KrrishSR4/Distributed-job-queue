@@ -16,15 +16,9 @@ import { RouterModule } from '@angular/router';
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between">
           
           <!-- Left: Logo & Brand -->
-          <a routerLink="/" class="flex items-center gap-3 group">
-            <div class="w-8 h-8 rounded-lg bg-blue-600 flex items-center justify-center text-white font-bold font-mono text-sm shadow-xs group-hover:bg-blue-700 transition-colors">
-              JQ
-            </div>
+          <a routerLink="/" class="flex items-center gap-2 group">
             <div class="flex flex-col">
-              <div class="flex items-center gap-2">
-                <span class="text-sm font-bold text-slate-900 tracking-tight">JobQueue HQ</span>
-                <span class="px-1.5 py-0.5 rounded text-[10px] font-mono font-medium bg-blue-50 text-blue-600 border border-blue-200">v1.4</span>
-              </div>
+              <span class="text-base font-extrabold text-slate-900 tracking-tight group-hover:text-blue-600 transition-colors">JobQueue</span>
               <span class="text-[10px] text-slate-500 font-mono hidden sm:inline">Distributed Engine</span>
             </div>
           </a>
@@ -1006,11 +1000,8 @@ import { RouterModule } from '@angular/router';
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 flex flex-col md:flex-row items-center justify-between gap-6">
           
           <div class="flex items-center gap-3">
-            <div class="w-7 h-7 rounded bg-blue-600 text-white font-bold font-mono flex items-center justify-center text-xs">
-              JQ
-            </div>
             <div>
-              <div class="font-bold text-white text-sm">JobQueue HQ</div>
+              <div class="font-bold text-white text-sm">JobQueue</div>
               <div class="text-[11px] text-slate-500">Distributed background job processing built with Go.</div>
             </div>
           </div>
