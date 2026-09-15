@@ -19,6 +19,10 @@
     --text-muted: #9ca3af;
   }
 
+  html {
+    scroll-behavior: smooth;
+  }
+
   body {
     background-color: var(--bg-primary);
     color: var(--text-main);
@@ -28,6 +32,27 @@
     -webkit-font-smoothing: antialiased;
     -moz-osx-font-smoothing: grayscale;
   }
+}
+
+/* Pipeline Flow Animations */
+@keyframes flowDash {
+  to {
+    stroke-dashoffset: -20;
+  }
+}
+
+.animate-flow-dash {
+  stroke-dasharray: 6;
+  animation: flowDash 1.2s linear infinite;
+}
+
+@keyframes pulseGlow {
+  0%, 100% { opacity: 0.4; transform: scale(0.98); }
+  50% { opacity: 1; transform: scale(1.02); }
+}
+
+.animate-pulse-glow {
+  animation: pulseGlow 2.5s ease-in-out infinite;
 }
 
 /* Custom Minimal Scrollbars */

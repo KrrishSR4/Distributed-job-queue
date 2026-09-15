@@ -15,15 +15,15 @@ import { DlqService } from '../../../services/dlq.service.js';
       
       <!-- Logo / Brand Header -->
       <div class="h-14 flex items-center justify-between px-4 border-b border-slate-200/80 dark:border-slate-800">
-        <div class="flex items-center gap-2.5 overflow-hidden">
-          <div class="w-7 h-7 rounded-lg bg-blue-600 flex items-center justify-center flex-shrink-0 text-white font-bold font-mono text-xs shadow-xs">
+        <a routerLink="/" class="flex items-center gap-2.5 overflow-hidden group cursor-pointer" title="Go to Landing Page">
+          <div class="w-7 h-7 rounded-lg bg-blue-600 flex items-center justify-center flex-shrink-0 text-white font-bold font-mono text-xs shadow-xs group-hover:bg-blue-700 transition-colors">
             JQ
           </div>
           <div *ngIf="!collapsed" class="flex flex-col min-w-0">
-            <span class="text-xs font-bold text-slate-900 dark:text-slate-100 tracking-tight whitespace-nowrap">JobQueue HQ</span>
+            <span class="text-xs font-bold text-slate-900 dark:text-slate-100 tracking-tight whitespace-nowrap group-hover:text-blue-600 transition-colors">JobQueue HQ</span>
             <span class="text-[10px] text-slate-400 font-mono tracking-wide uppercase">v1.4.0 • Enterprise</span>
           </div>
-        </div>
+        </a>
 
         <button (click)="toggleCollapse()" class="text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 p-1 rounded-md hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors">
           <svg [ngClass]="{'rotate-180': collapsed}" class="w-4 h-4 transition-transform duration-200" fill="none" viewBox="0 0 24 24" stroke="currentColor">

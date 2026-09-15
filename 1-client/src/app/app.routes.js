@@ -1,3 +1,4 @@
+import { LandingPageComponent } from './pages/landing/landing.component.js';
 import { MainLayoutComponent } from './layouts/main-layout/main-layout.component.js';
 import { DashboardComponent } from './pages/dashboard/dashboard.component.js';
 import { JobsComponent } from './pages/jobs/jobs.component.js';
@@ -9,11 +10,11 @@ import { AnalyticsComponent } from './pages/analytics/analytics.component.js';
 import { SettingsComponent } from './pages/settings/settings.component.js';
 
 export const routes = [
+  { path: '', component: LandingPageComponent, pathMatch: 'full' },
   {
     path: '',
     component: MainLayoutComponent,
     children: [
-      { path: '', redirectTo: 'dashboard', pathMatch: 'full' },
       { path: 'dashboard', component: DashboardComponent },
       { path: 'jobs', component: JobsComponent },
       { path: 'workers', component: WorkersComponent },
