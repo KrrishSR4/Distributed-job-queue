@@ -17,12 +17,21 @@ distributed-job-queue/
 │   ├── angular.json
 │   └── ...
 │
-├── 2-server/                 # Phase 2: Go Backend API & Worker Nodes (Scaffolding)
+├── 2-server/                 # Phase 2: Go Backend REST API Foundation
 │   ├── cmd/
+│   │   └── api/
+│   │       └── main.go
 │   ├── internal/
-│   ├── pkg/
-│   ├── migrations/
-│   └── go.mod
+│   │   ├── api/              # Handlers, Middleware, Routes
+│   │   ├── config/           # Environment Configuration
+│   │   ├── database/         # PostgreSQL pgx Pool & Health
+│   │   ├── jobs/             # Repository & Service Layers
+│   │   └── models/           # Job Schema & DTOs
+│   ├── pkg/                  # Logger & Response Helpers
+│   ├── migrations/           # SQL DDL Scripts
+│   ├── .env.example
+│   ├── go.mod
+│   └── go.sum
 │
 ├── 3-infrastructure/         # Docker, Kubernetes, Terraform & Monitoring configs
 │   ├── docker/
@@ -32,7 +41,9 @@ distributed-job-queue/
 │
 ├── 4-docs/                   # Architecture, API & System Design Docs
 │   ├── architecture/
+│   │   └── backend.md        # Layered architecture & DB schema
 │   ├── api/
+│   │   └── endpoints.md      # REST API specification & JSON examples
 │   └── system-design/
 │
 ├── .gitignore
@@ -64,12 +75,31 @@ npm run build
 
 ---
 
+### 2-server (Go Backend API)
+
+Navigate to the `2-server` directory to run unit tests or start the Go REST API server:
+
+```bash
+cd 2-server
+
+# Run unit tests
+go test -v ./...
+
+# Run static analysis
+go vet ./...
+
+# Start Go API server (http://localhost:8080)
+go run ./cmd/api
+```
+
+---
+
 ## 🛠 Tech Stack
 
 - **Frontend (`1-client`)**: Angular (JavaScript), RxJS, Tailwind CSS v4, ECharts
-- **Backend (`2-server`)**: Go (Golang) *(Phase 2)*
-- **Broker & Persistence**: Redis, PostgreSQL *(Phase 2)*
-- **Infrastructure (`3-infrastructure`)**: Docker, Kubernetes, Prometheus, Grafana *(Phase 2)*
+- **Backend (`2-server`)**: Go 1.22+, Chi Router, pgx (PostgreSQL), slog Structured Logging
+- **Data Layer**: PostgreSQL 16 (Relational Persistence), Redis 7 (Phase 3 Queue Broker)
+- **Infrastructure (`3-infrastructure`)**: Docker, Kubernetes, Prometheus, Grafana
 
 ---
 
