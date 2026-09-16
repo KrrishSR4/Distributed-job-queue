@@ -19,6 +19,9 @@ type Repository interface {
 	GetByID(ctx context.Context, id string) (*models.Job, error)
 	List(ctx context.Context, filter models.JobListFilter) ([]*models.Job, int, error)
 	Delete(ctx context.Context, id string) error
+	UpdateStatusProcessing(ctx context.Context, id string, workerID string, startedAt time.Time) error
+	UpdateStatusCompleted(ctx context.Context, id string, completedAt time.Time) error
+	UpdateStatusFailed(ctx context.Context, id string, failedAt time.Time, errStr string) error
 }
 
 type PostgresRepository struct {
@@ -148,6 +151,45 @@ func (r *PostgresRepository) Delete(ctx context.Context, id string) error {
 	return nil
 }
 
+func (r *PostgresRepository) UpdateStatusProcessing(ctx context.Context, id string, workerID string, startedAt time.Time) error {
+	query := `
+		UPDATE jobs
+		SET status = $2, worker_id = $3, started_at = $4
+		WHERE id = $1
+	`
+	_, err := r.pool.Exec(ctx, query, id, models.StatusProcessing, workerID, startedAt)
+	if err != nil {
+		return fmt.Errorf("failed to update job status to processing: %w", err)
+	}
+	return nil
+}
+
+func (r *PostgresRepository) UpdateStatusCompleted(ctx context.Context, id string, completedAt time.Time) error {
+	query := `
+		UPDATE jobs
+		SET status = $2, completed_at = $3
+		WHERE id = $1
+	`
+	_, err := r.pool.Exec(ctx, query, id, models.StatusCompleted, completedAt)
+	if err != nil {
+		return fmt.Errorf("failed to update job status to completed: %w", err)
+	}
+	return nil
+}
+
+func (r *PostgresRepository) UpdateStatusFailed(ctx context.Context, id string, failedAt time.Time, errStr string) error {
+	query := `
+		UPDATE jobs
+		SET status = $2, failed_at = $3, error = $4
+		WHERE id = $1
+	`
+	_, err := r.pool.Exec(ctx, query, id, models.StatusFailed, failedAt, errStr)
+	if err != nil {
+		return fmt.Errorf("failed to update job status to failed: %w", err)
+	}
+	return nil
+}
+
 // MemoryRepository provides an in-memory fallback for standalone testing or development without a live PostgreSQL instance.
 type MemoryRepository struct {
 	mu   sync.RWMutex
@@ -221,6 +263,44 @@ func (m *MemoryRepository) Delete(ctx context.Context, id string) error {
 		return pgx.ErrNoRows
 	}
 	delete(m.jobs, id)
+	return nil
+}
+
+func (m *MemoryRepository) UpdateStatusProcessing(ctx context.Context, id string, workerID string, startedAt time.Time) error {
+	m.mu.Lock()
+	defer m.mu.Unlock()
+	job, exists := m.jobs[id]
+	if !exists {
+		return pgx.ErrNoRows
+	}
+	job.Status = models.StatusProcessing
+	job.WorkerID = &workerID
+	job.StartedAt = &startedAt
+	return nil
+}
+
+func (m *MemoryRepository) UpdateStatusCompleted(ctx context.Context, id string, completedAt time.Time) error {
+	m.mu.Lock()
+	defer m.mu.Unlock()
+	job, exists := m.jobs[id]
+	if !exists {
+		return pgx.ErrNoRows
+	}
+	job.Status = models.StatusCompleted
+	job.CompletedAt = &completedAt
+	return nil
+}
+
+func (m *MemoryRepository) UpdateStatusFailed(ctx context.Context, id string, failedAt time.Time, errStr string) error {
+	m.mu.Lock()
+	defer m.mu.Unlock()
+	job, exists := m.jobs[id]
+	if !exists {
+		return pgx.ErrNoRows
+	}
+	job.Status = models.StatusFailed
+	job.FailedAt = &failedAt
+	job.Error = &errStr
 	return nil
 }
 

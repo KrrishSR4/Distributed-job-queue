@@ -2,6 +2,7 @@ package config
 
 import (
 	"os"
+	"strconv"
 
 	"github.com/KrrishSR4/Distributed-job-queue/server/pkg/logger"
 	"github.com/joho/godotenv"
@@ -14,11 +15,19 @@ type Config struct {
 	RedisQueueKey string
 	AppEnv        string
 	AllowedOrigin string
+	WorkerCount   int
 }
 
 func Load() *Config {
 	if err := godotenv.Load(); err != nil {
 		logger.Debug("No .env file found, reading environment variables directly")
+	}
+
+	workerCountStr := getEnv("WORKER_COUNT", "3")
+	workerCount, err := strconv.Atoi(workerCountStr)
+	if err != nil || workerCount <= 0 {
+		logger.Warn("Invalid WORKER_COUNT specified, defaulting to 3", "specified", workerCountStr)
+		workerCount = 3
 	}
 
 	cfg := &Config{
@@ -28,6 +37,7 @@ func Load() *Config {
 		RedisQueueKey: getEnv("REDIS_QUEUE_KEY", "jobs:queue"),
 		AppEnv:        getEnv("APP_ENV", "development"),
 		AllowedOrigin: getEnv("ALLOWED_ORIGIN", "http://localhost:4200"),
+		WorkerCount:   workerCount,
 	}
 
 	return cfg

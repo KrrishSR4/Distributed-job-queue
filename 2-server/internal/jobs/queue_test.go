@@ -69,3 +69,39 @@ func TestMemoryQueueEnqueue(t *testing.T) {
 		t.Errorf("expected enqueued job_id job-test-456, got %s", mq.Enqueued[0].JobID)
 	}
 }
+
+func TestMemoryQueueDequeue(t *testing.T) {
+	mq := NewMemoryQueue()
+	ctx := context.Background()
+
+	job := &models.Job{
+		ID:       "job-test-789",
+		Type:     "email.send",
+		Priority: models.PriorityHigh,
+		Attempts: 0,
+	}
+
+	if err := mq.Enqueue(ctx, job); err != nil {
+		t.Fatalf("failed to enqueue: %v", err)
+	}
+
+	payload, err := mq.Dequeue(ctx, 100*time.Millisecond)
+	if err != nil {
+		t.Fatalf("failed to dequeue: %v", err)
+	}
+	if payload == nil {
+		t.Fatal("expected non-nil payload")
+	}
+	if payload.JobID != "job-test-789" {
+		t.Errorf("expected job_id job-test-789, got %s", payload.JobID)
+	}
+
+	// Dequeue on empty queue should return nil, nil after timeout
+	emptyPayload, err := mq.Dequeue(ctx, 50*time.Millisecond)
+	if err != nil {
+		t.Fatalf("unexpected error on empty dequeue: %v", err)
+	}
+	if emptyPayload != nil {
+		t.Errorf("expected nil payload on empty queue, got %v", emptyPayload)
+	}
+}

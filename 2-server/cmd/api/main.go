@@ -16,6 +16,7 @@ import (
 	"github.com/KrrishSR4/Distributed-job-queue/server/internal/database"
 	"github.com/KrrishSR4/Distributed-job-queue/server/internal/jobs"
 	appRedis "github.com/KrrishSR4/Distributed-job-queue/server/internal/redis"
+	"github.com/KrrishSR4/Distributed-job-queue/server/internal/workers"
 	"github.com/KrrishSR4/Distributed-job-queue/server/pkg/logger"
 )
 
@@ -26,6 +27,7 @@ func main() {
 	log.Info("Starting Distributed Job Queue API Server...",
 		"env", cfg.AppEnv,
 		"port", cfg.Port,
+		"worker_count", cfg.WorkerCount,
 		"allowed_origin", cfg.AllowedOrigin,
 	)
 
@@ -60,6 +62,11 @@ func main() {
 	}
 
 	jobService := jobs.NewJobService(repo, queue)
+
+	// Initialize and start Worker Pool
+	processor := workers.NewDemoProcessor(200 * time.Millisecond)
+	workerPool := workers.NewWorkerPool(cfg.WorkerCount, repo, queue, processor)
+	workerPool.Start()
 
 	healthHandler := handlers.NewHealthHandler(db, redisClient)
 	jobHandler := handlers.NewJobHandler(jobService)
@@ -97,6 +104,9 @@ func main() {
 		if err := server.Shutdown(shutdownCtx); err != nil {
 			log.Error("HTTP server shutdown error", "error", err)
 		}
+
+		// Stop worker pool gracefully before stopping Redis and Postgres connections
+		workerPool.Stop()
 
 		if db != nil {
 			db.Close()
