@@ -22,11 +22,18 @@ services:
   #     - redis
   #     - postgres
 
-  # Phase 2: Redis Job Broker (Placeholder)
-  # redis:
-  #   image: redis:7-alpine
-  #   ports:
-  #     - "6379:6379"
+  # Phase 3: Redis Job Broker & Pub/Sub
+  redis:
+    image: redis:7-alpine
+    container_name: djq-redis
+    ports:
+      - "6379:6379"
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 5s
+      timeout: 3s
+      retries: 5
 
   # Phase 2: PostgreSQL Database (Placeholder)
   # postgres:

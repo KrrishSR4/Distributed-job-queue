@@ -12,7 +12,7 @@ The Distributed Job Queue backend exposes a RESTful HTTP API listening on port `
 
 ### `GET /health`
 
-Verifies that the Go API server process is alive and checks the health status of the PostgreSQL database connection pool.
+Verifies that the Go API server process is alive and checks the connection health status of PostgreSQL and Redis.
 
 #### Response `200 OK`
 
@@ -21,8 +21,9 @@ Verifies that the Go API server process is alive and checks the health status of
   "success": true,
   "data": {
     "status": "ok",
-    "database": "healthy",
-    "timestamp": "2026-09-15T21:40:00Z"
+    "database": "connected",
+    "redis": "connected",
+    "timestamp": "2026-09-16T05:40:00Z"
   }
 }
 ```

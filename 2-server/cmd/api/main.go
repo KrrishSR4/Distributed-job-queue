@@ -15,6 +15,7 @@ import (
 	"github.com/KrrishSR4/Distributed-job-queue/server/internal/config"
 	"github.com/KrrishSR4/Distributed-job-queue/server/internal/database"
 	"github.com/KrrishSR4/Distributed-job-queue/server/internal/jobs"
+	appRedis "github.com/KrrishSR4/Distributed-job-queue/server/internal/redis"
 	"github.com/KrrishSR4/Distributed-job-queue/server/pkg/logger"
 )
 
@@ -44,9 +45,14 @@ func main() {
 		repo = memRepo
 	}
 
+	redisClient, err := appRedis.NewClient(ctx, cfg.RedisURL)
+	if err != nil {
+		log.Warn("Failed to initialize Redis client", "error", err)
+	}
+
 	jobService := jobs.NewJobService(repo)
 
-	healthHandler := handlers.NewHealthHandler(db)
+	healthHandler := handlers.NewHealthHandler(db, redisClient)
 	jobHandler := handlers.NewJobHandler(jobService)
 
 	router := routes.SetupRouter(cfg.AllowedOrigin, healthHandler, jobHandler)
@@ -85,6 +91,10 @@ func main() {
 
 		if db != nil {
 			db.Close()
+		}
+
+		if redisClient != nil {
+			redisClient.Close()
 		}
 
 		serverStopCtx()
