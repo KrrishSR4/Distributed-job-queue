@@ -8,6 +8,7 @@ import (
 	"time"
 
 	"github.com/KrrishSR4/Distributed-job-queue/server/internal/models"
+	"github.com/KrrishSR4/Distributed-job-queue/server/pkg/logger"
 	"github.com/google/uuid"
 	"github.com/jackc/pgx/v5"
 )
@@ -26,11 +27,15 @@ type Service interface {
 }
 
 type JobService struct {
-	repo Repository
+	repo  Repository
+	queue Queue
 }
 
-func NewJobService(repo Repository) *JobService {
-	return &JobService{repo: repo}
+func NewJobService(repo Repository, queue Queue) *JobService {
+	return &JobService{
+		repo:  repo,
+		queue: queue,
+	}
 }
 
 func (s *JobService) CreateJob(ctx context.Context, req models.CreateJobRequest) (*models.Job, error) {
@@ -54,7 +59,14 @@ func (s *JobService) CreateJob(ctx context.Context, req models.CreateJobRequest)
 	}
 
 	if err := s.repo.Create(ctx, job); err != nil {
-		return nil, fmt.Errorf("failed to create job: %w", err)
+		return nil, fmt.Errorf("failed to create job in database: %w", err)
+	}
+
+	if s.queue != nil {
+		if err := s.queue.Enqueue(ctx, job); err != nil {
+			logger.Error("Failed to enqueue job into Redis queue", "job_id", job.ID, "error", err)
+			return nil, fmt.Errorf("job persisted to database but failed to enqueue into queue broker")
+		}
 	}
 
 	return job, nil

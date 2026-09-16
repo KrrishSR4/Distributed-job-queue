@@ -10,7 +10,8 @@ import (
 
 func TestJobServiceCRUD(t *testing.T) {
 	repo := NewMemoryRepository()
-	service := NewJobService(repo)
+	queue := NewMemoryQueue()
+	service := NewJobService(repo, queue)
 	ctx := context.Background()
 
 	// 1. Create Job

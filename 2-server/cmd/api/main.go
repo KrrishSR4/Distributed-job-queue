@@ -50,7 +50,16 @@ func main() {
 		log.Warn("Failed to initialize Redis client", "error", err)
 	}
 
-	jobService := jobs.NewJobService(repo)
+	var queue jobs.Queue
+	if redisClient != nil && redisClient.IsHealthy(ctx) {
+		log.Info("Using Redis Job Queue", "key", cfg.RedisQueueKey)
+		queue = jobs.NewRedisQueue(redisClient, cfg.RedisQueueKey)
+	} else {
+		log.Warn("Redis unavailable or disconnected. Falling back to Memory Queue for local dev testing")
+		queue = jobs.NewMemoryQueue()
+	}
+
+	jobService := jobs.NewJobService(repo, queue)
 
 	healthHandler := handlers.NewHealthHandler(db, redisClient)
 	jobHandler := handlers.NewJobHandler(jobService)
