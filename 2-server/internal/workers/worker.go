@@ -13,14 +13,16 @@ type Worker struct {
 	queue     jobs.Queue
 	repo      jobs.Repository
 	processor JobProcessor
+	retryMgr  *RetryManager
 }
 
-func NewWorker(id string, queue jobs.Queue, repo jobs.Repository, processor JobProcessor) *Worker {
+func NewWorker(id string, queue jobs.Queue, repo jobs.Repository, processor JobProcessor, retryMgr *RetryManager) *Worker {
 	return &Worker{
 		id:        id,
 		queue:     queue,
 		repo:      repo,
 		processor: processor,
+		retryMgr:  retryMgr,
 	}
 }
 
@@ -80,6 +82,7 @@ func (w *Worker) processJobPayload(ctx context.Context, payload *jobs.QueuePaylo
 	}
 	job.WorkerID = &w.id
 	job.StartedAt = &startedAt
+	job.Attempts++ // manually increment local struct to match DB state
 
 	logger.Info("Job processing started", "worker_id", w.id, "job_id", job.ID, "job_type", job.Type)
 
@@ -89,16 +92,30 @@ func (w *Worker) processJobPayload(ctx context.Context, payload *jobs.QueuePaylo
 	if procErr != nil {
 		failedAt := time.Now().UTC()
 		errStr := procErr.Error()
-		if err := w.repo.UpdateStatusFailed(ctx, job.ID, failedAt, errStr); err != nil {
-			logger.Error("Failed to update job status to failed", "worker_id", w.id, "job_id", job.ID, "error", err)
+		
+		if job.Attempts < job.MaxAttempts {
+			logger.Warn("Job processing failed, scheduling retry",
+				"worker_id", w.id,
+				"job_id", job.ID,
+				"attempt", job.Attempts,
+				"max_attempts", job.MaxAttempts,
+				"error", errStr,
+			)
+			if err := w.retryMgr.ScheduleRetry(ctx, job, errStr); err != nil {
+				logger.Error("Failed to schedule job retry", "worker_id", w.id, "job_id", job.ID, "error", err)
+			}
+		} else {
+			if err := w.repo.UpdateStatusFailed(ctx, job.ID, failedAt, errStr); err != nil {
+				logger.Error("Failed to update job status to failed", "worker_id", w.id, "job_id", job.ID, "error", err)
+			}
+			logger.Error("Job failed (max attempts reached)",
+				"worker_id", w.id,
+				"job_id", job.ID,
+				"job_type", job.Type,
+				"duration", duration.String(),
+				"error", errStr,
+			)
 		}
-		logger.Error("Job failed",
-			"worker_id", w.id,
-			"job_id", job.ID,
-			"job_type", job.Type,
-			"duration", duration.String(),
-			"error", errStr,
-		)
 	} else {
 		completedAt := time.Now().UTC()
 		if err := w.repo.UpdateStatusCompleted(ctx, job.ID, completedAt); err != nil {

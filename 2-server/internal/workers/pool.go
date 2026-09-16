@@ -4,6 +4,7 @@ import (
 	"context"
 	"fmt"
 	"sync"
+	"time"
 
 	"github.com/KrrishSR4/Distributed-job-queue/server/internal/jobs"
 	"github.com/KrrishSR4/Distributed-job-queue/server/pkg/logger"
@@ -20,12 +21,13 @@ type WorkerPool struct {
 	cancel      context.CancelFunc
 }
 
-func NewWorkerPool(workerCount int, repo jobs.Repository, queue jobs.Queue, processor JobProcessor) *WorkerPool {
+func NewWorkerPool(workerCount int, repo jobs.Repository, queue jobs.Queue, processor JobProcessor, retryBaseDelay, retryMaxDelay time.Duration) *WorkerPool {
 	if workerCount <= 0 {
 		workerCount = 3
 	}
 
 	ctx, cancel := context.WithCancel(context.Background())
+	retryMgr := NewRetryManager(retryBaseDelay, retryMaxDelay, queue, repo)
 
 	pool := &WorkerPool{
 		workerCount: workerCount,
@@ -39,7 +41,7 @@ func NewWorkerPool(workerCount int, repo jobs.Repository, queue jobs.Queue, proc
 
 	for i := 1; i <= workerCount; i++ {
 		workerID := fmt.Sprintf("worker-%d", i)
-		worker := NewWorker(workerID, queue, repo, processor)
+		worker := NewWorker(workerID, queue, repo, processor, retryMgr)
 		pool.workers = append(pool.workers, worker)
 	}
 

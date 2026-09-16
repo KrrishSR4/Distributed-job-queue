@@ -2,6 +2,7 @@ package workers
 
 import (
 	"context"
+	"fmt"
 	"time"
 
 	"github.com/KrrishSR4/Distributed-job-queue/server/internal/models"
@@ -36,6 +37,9 @@ func (p *DemoProcessor) Process(ctx context.Context, job *models.Job, workerID s
 			return ctx.Err()
 		case <-time.After(p.ProcessDelay):
 		}
+	}
+	if job.Type == "test_fail" {
+		return fmt.Errorf("simulated failure for retry testing")
 	}
 
 	return nil

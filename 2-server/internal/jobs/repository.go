@@ -22,6 +22,7 @@ type Repository interface {
 	UpdateStatusProcessing(ctx context.Context, id string, workerID string, startedAt time.Time) error
 	UpdateStatusCompleted(ctx context.Context, id string, completedAt time.Time) error
 	UpdateStatusFailed(ctx context.Context, id string, failedAt time.Time, errStr string) error
+	UpdateStatusRetry(ctx context.Context, id string, errStr string) error
 }
 
 type PostgresRepository struct {
@@ -154,7 +155,7 @@ func (r *PostgresRepository) Delete(ctx context.Context, id string) error {
 func (r *PostgresRepository) UpdateStatusProcessing(ctx context.Context, id string, workerID string, startedAt time.Time) error {
 	query := `
 		UPDATE jobs
-		SET status = $2, worker_id = $3, started_at = $4
+		SET status = $2, worker_id = $3, started_at = $4, attempts = attempts + 1
 		WHERE id = $1
 	`
 	_, err := r.pool.Exec(ctx, query, id, models.StatusProcessing, workerID, startedAt)
@@ -186,6 +187,19 @@ func (r *PostgresRepository) UpdateStatusFailed(ctx context.Context, id string, 
 	_, err := r.pool.Exec(ctx, query, id, models.StatusFailed, failedAt, errStr)
 	if err != nil {
 		return fmt.Errorf("failed to update job status to failed: %w", err)
+	}
+	return nil
+}
+
+func (r *PostgresRepository) UpdateStatusRetry(ctx context.Context, id string, errStr string) error {
+	query := `
+		UPDATE jobs
+		SET status = $2, error = $3
+		WHERE id = $1
+	`
+	_, err := r.pool.Exec(ctx, query, id, models.StatusQueued, errStr)
+	if err != nil {
+		return fmt.Errorf("failed to update job status to retry (queued): %w", err)
 	}
 	return nil
 }
@@ -273,6 +287,7 @@ func (m *MemoryRepository) UpdateStatusProcessing(ctx context.Context, id string
 	if !exists {
 		return pgx.ErrNoRows
 	}
+	job.Attempts++
 	job.Status = models.StatusProcessing
 	job.WorkerID = &workerID
 	job.StartedAt = &startedAt
@@ -300,6 +315,18 @@ func (m *MemoryRepository) UpdateStatusFailed(ctx context.Context, id string, fa
 	}
 	job.Status = models.StatusFailed
 	job.FailedAt = &failedAt
+	job.Error = &errStr
+	return nil
+}
+
+func (m *MemoryRepository) UpdateStatusRetry(ctx context.Context, id string, errStr string) error {
+	m.mu.Lock()
+	defer m.mu.Unlock()
+	job, exists := m.jobs[id]
+	if !exists {
+		return pgx.ErrNoRows
+	}
+	job.Status = models.StatusQueued
 	job.Error = &errStr
 	return nil
 }

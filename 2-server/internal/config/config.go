@@ -3,19 +3,22 @@ package config
 import (
 	"os"
 	"strconv"
+	"time"
 
 	"github.com/KrrishSR4/Distributed-job-queue/server/pkg/logger"
 	"github.com/joho/godotenv"
 )
 
 type Config struct {
-	Port          string
-	DatabaseURL   string
-	RedisURL      string
-	RedisQueueKey string
-	AppEnv        string
-	AllowedOrigin string
-	WorkerCount   int
+	Port           string
+	DatabaseURL    string
+	RedisURL       string
+	RedisQueueKey  string
+	AppEnv         string
+	AllowedOrigin  string
+	WorkerCount    int
+	RetryBaseDelay time.Duration
+	RetryMaxDelay  time.Duration
 }
 
 func Load() *Config {
@@ -30,14 +33,30 @@ func Load() *Config {
 		workerCount = 3
 	}
 
+	baseDelayStr := getEnv("RETRY_BASE_DELAY", "1s")
+	baseDelay, err := time.ParseDuration(baseDelayStr)
+	if err != nil || baseDelay <= 0 {
+		logger.Warn("Invalid RETRY_BASE_DELAY specified, defaulting to 1s", "specified", baseDelayStr)
+		baseDelay = 1 * time.Second
+	}
+
+	maxDelayStr := getEnv("RETRY_MAX_DELAY", "30s")
+	maxDelay, err := time.ParseDuration(maxDelayStr)
+	if err != nil || maxDelay <= 0 {
+		logger.Warn("Invalid RETRY_MAX_DELAY specified, defaulting to 30s", "specified", maxDelayStr)
+		maxDelay = 30 * time.Second
+	}
+
 	cfg := &Config{
-		Port:          getEnv("PORT", "8080"),
-		DatabaseURL:   getEnv("DATABASE_URL", "postgres://postgres:postgres@localhost:5432/djq_db?sslmode=disable"),
-		RedisURL:      getEnv("REDIS_URL", "redis://localhost:6379"),
-		RedisQueueKey: getEnv("REDIS_QUEUE_KEY", "jobs:queue"),
-		AppEnv:        getEnv("APP_ENV", "development"),
-		AllowedOrigin: getEnv("ALLOWED_ORIGIN", "http://localhost:4200"),
-		WorkerCount:   workerCount,
+		Port:           getEnv("PORT", "8080"),
+		DatabaseURL:    getEnv("DATABASE_URL", "postgres://postgres:postgres@localhost:5432/djq_db?sslmode=disable"),
+		RedisURL:       getEnv("REDIS_URL", "redis://localhost:6379"),
+		RedisQueueKey:  getEnv("REDIS_QUEUE_KEY", "jobs:queue"),
+		AppEnv:         getEnv("APP_ENV", "development"),
+		AllowedOrigin:  getEnv("ALLOWED_ORIGIN", "http://localhost:4200"),
+		WorkerCount:    workerCount,
+		RetryBaseDelay: baseDelay,
+		RetryMaxDelay:  maxDelay,
 	}
 
 	return cfg
