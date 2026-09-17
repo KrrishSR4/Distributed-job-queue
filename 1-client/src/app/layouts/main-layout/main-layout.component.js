@@ -132,7 +132,7 @@ import { NotificationService } from '../../services/notification.service.js';
                  [title]="'Job Details & Lifecycle Inspector'" 
                  [subtitle]="(jobService.selectedJob$ | async)?.id"
                  size="2xl">
-        <div *if="(jobService.selectedJob$ | async) as job" class="space-y-5 font-sans">
+        <div *ngIf="(jobService.selectedJob$ | async) as job" class="space-y-5 font-sans">
           
           <!-- Visual Lifecycle Timeline Step Progress -->
           <!-- Visual Lifecycle Timeline Step Progress -->
@@ -206,7 +206,7 @@ import { NotificationService } from '../../services/notification.service.js';
           </div>
 
           <!-- Error Details Callout -->
-          <div *if="job.error" class="p-3 bg-zinc-50 dark:bg-zinc-900/50 border border-zinc-200 dark:border-zinc-800 rounded-xl">
+          <div *ngIf="job.error" class="p-3 bg-zinc-50 dark:bg-zinc-900/50 border border-zinc-200 dark:border-zinc-800 rounded-xl">
             <span class="text-[10px] uppercase font-mono text-zinc-500 dark:text-zinc-400 font-bold block mb-1">Execution Failure Reason</span>
             <p class="text-xs font-mono text-zinc-800 dark:text-zinc-200 leading-relaxed break-words">{{ job.error }}</p>
           </div>
@@ -221,7 +221,7 @@ import { NotificationService } from '../../services/notification.service.js';
           <div>
             <span class="text-[10px] font-semibold text-zinc-500 uppercase tracking-widest block mb-2">Execution Log Stream</span>
             <div class="bg-zinc-50 dark:bg-[#121214] rounded-xl border border-zinc-200/80 dark:border-zinc-800 p-4 max-h-36 overflow-y-auto space-y-1 font-mono text-xs text-zinc-600 dark:text-zinc-400">
-              <div *for="let log of job.logs" class="hover:bg-zinc-100 dark:hover:bg-zinc-900 px-2 py-1 rounded transition-colors">
+              <div *ngFor="let log of job.logs" class="hover:bg-zinc-100 dark:hover:bg-zinc-900 px-2 py-1 rounded transition-colors">
                 {{ log }}
               </div>
             </div>
