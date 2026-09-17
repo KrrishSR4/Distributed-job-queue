@@ -25,6 +25,7 @@ import { RouterModule } from '@angular/router';
 
           <!-- Center: Navigation Links -->
           <nav class="hidden md:flex items-center gap-6 text-xs font-medium text-slate-600">
+            <a routerLink="/docs" class="hover:text-blue-600 transition-colors cursor-pointer font-bold">Documentation</a>
             <button (click)="scrollToSection('how-it-works')" class="hover:text-blue-600 transition-colors cursor-pointer">How It Works</button>
             <button (click)="scrollToSection('features')" class="hover:text-blue-600 transition-colors cursor-pointer">Features</button>
             <button (click)="scrollToSection('reliability')" class="hover:text-blue-600 transition-colors cursor-pointer">Reliability</button>

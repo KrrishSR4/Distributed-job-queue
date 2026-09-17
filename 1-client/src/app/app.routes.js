@@ -8,9 +8,11 @@ import { SchedulerComponent } from './pages/scheduler/scheduler.component.js';
 import { DlqComponent } from './pages/dlq/dlq.component.js';
 import { AnalyticsComponent } from './pages/analytics/analytics.component.js';
 import { SettingsComponent } from './pages/settings/settings.component.js';
+import { DocsPageComponent } from './pages/docs/docs.component.js';
 
 export const routes = [
   { path: '', component: LandingPageComponent, pathMatch: 'full' },
+  { path: 'docs', component: DocsPageComponent },
   {
     path: '',
     component: MainLayoutComponent,
