@@ -27,11 +27,11 @@ import { NotificationService } from '../../../services/notification.service.js';
         </div>
 
         <div class="flex-1 min-w-0">
-          <h4 class="text-xs font-semibold text-slate-100 uppercase tracking-wider">{{ toast.title }}</h4>
-          <p class="text-xs text-slate-300 mt-0.5 leading-relaxed">{{ toast.message }}</p>
+          <h4 class="text-[11px] font-bold text-zinc-100 uppercase tracking-widest">{{ toast.title }}</h4>
+          <p class="text-xs text-zinc-400 mt-1 leading-relaxed">{{ toast.message }}</p>
         </div>
 
-        <button (click)="notificationService.remove(toast.id)" class="text-slate-400 hover:text-slate-200">
+        <button (click)="notificationService.remove(toast.id)" class="text-zinc-500 hover:text-zinc-300 transition-colors">
           <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
           </svg>
@@ -45,11 +45,11 @@ export class ToastComponent {
 
   getToastClass(type) {
     switch (type) {
-      case 'success': return 'bg-slate-900 border-emerald-500/30 text-slate-100';
-      case 'error': return 'bg-slate-900 border-rose-500/30 text-slate-100';
-      case 'warning': return 'bg-slate-900 border-amber-500/30 text-slate-100';
-      case 'info': return 'bg-slate-900 border-blue-500/30 text-slate-100';
-      default: return 'bg-slate-900 border-slate-700 text-slate-100';
+      case 'success': return 'bg-[#121214] border-zinc-800 text-zinc-100';
+      case 'error': return 'bg-[#121214] border-rose-500/30 text-zinc-100';
+      case 'warning': return 'bg-[#121214] border-amber-500/30 text-zinc-100';
+      case 'info': return 'bg-[#121214] border-zinc-800 text-zinc-100';
+      default: return 'bg-[#121214] border-zinc-800 text-zinc-100';
     }
   }
 }

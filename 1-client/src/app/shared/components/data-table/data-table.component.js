@@ -6,35 +6,35 @@ import { CommonModule } from '@angular/common';
   standalone: true,
   imports: [CommonModule],
   template: `
-    <div class="w-full bg-white dark:bg-slate-900 border border-slate-200/80 dark:border-slate-800 rounded-xl overflow-hidden shadow-xs flex flex-col">
+    <div class="w-full bg-white dark:bg-[#09090b] border border-zinc-200/80 dark:border-zinc-800 rounded-xl overflow-hidden flex flex-col">
       <div class="overflow-x-auto">
         <table class="w-full text-left text-xs border-collapse">
           <thead>
-            <tr class="bg-slate-50/80 dark:bg-slate-950/60 border-b border-slate-200/80 dark:border-slate-800 text-slate-500 dark:text-slate-400 font-medium uppercase tracking-wider">
-              <th *ngFor="let col of columns" class="px-4 py-3 font-mono text-[11px] whitespace-nowrap">
+            <tr class="bg-zinc-50/80 dark:bg-zinc-900/40 border-b border-zinc-200/80 dark:border-zinc-800 text-zinc-500 dark:text-zinc-400 font-medium uppercase tracking-widest">
+              <th *ngFor="let col of columns" class="px-5 py-3.5 font-mono text-[10px] whitespace-nowrap">
                 {{ col.header }}
               </th>
             </tr>
           </thead>
-          <tbody class="divide-y divide-slate-200/60 dark:divide-slate-800/60 text-slate-700 dark:text-slate-200">
+          <tbody class="divide-y divide-zinc-200/60 dark:divide-zinc-800/60 text-zinc-700 dark:text-zinc-200">
             <ng-content></ng-content>
           </tbody>
         </table>
       </div>
 
-      <div *ngIf="showPagination" class="flex items-center justify-between px-4 py-3 bg-slate-50/50 dark:bg-slate-950/40 border-t border-slate-200/80 dark:border-slate-800 text-xs text-slate-500 dark:text-slate-400">
+      <div *ngIf="showPagination" class="flex items-center justify-between px-5 py-3 bg-zinc-50/50 dark:bg-zinc-900/20 border-t border-zinc-200/80 dark:border-zinc-800 text-xs text-zinc-500 dark:text-zinc-400">
         <div class="flex items-center gap-2 font-mono text-[11px]">
           <span>Showing page {{ currentPage }} of {{ totalPages || 1 }}</span>
-          <span>•</span>
+          <span class="text-zinc-300 dark:text-zinc-700">•</span>
           <span>{{ totalItems }} items total</span>
         </div>
-        <div class="flex items-center gap-1">
+        <div class="flex items-center gap-2">
           <button (click)="prevPage()" [disabled]="currentPage <= 1" 
-                  class="px-2.5 py-1 rounded-md bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 hover:bg-slate-50 dark:hover:bg-slate-700 disabled:opacity-40 disabled:cursor-not-allowed text-slate-700 dark:text-slate-200 font-medium transition-colors shadow-2xs">
+                  class="px-3 py-1.5 rounded-md bg-white dark:bg-[#121214] border border-zinc-200 dark:border-zinc-700 hover:bg-zinc-50 dark:hover:bg-zinc-800 disabled:opacity-40 disabled:cursor-not-allowed text-zinc-700 dark:text-zinc-200 font-medium transition-colors shadow-sm text-[11px]">
             Previous
           </button>
           <button (click)="nextPage()" [disabled]="currentPage >= totalPages" 
-                  class="px-2.5 py-1 rounded-md bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 hover:bg-slate-50 dark:hover:bg-slate-700 disabled:opacity-40 disabled:cursor-not-allowed text-slate-700 dark:text-slate-200 font-medium transition-colors shadow-2xs">
+                  class="px-3 py-1.5 rounded-md bg-white dark:bg-[#121214] border border-zinc-200 dark:border-zinc-700 hover:bg-zinc-50 dark:hover:bg-zinc-800 disabled:opacity-40 disabled:cursor-not-allowed text-zinc-700 dark:text-zinc-200 font-medium transition-colors shadow-sm text-[11px]">
             Next
           </button>
         </div>

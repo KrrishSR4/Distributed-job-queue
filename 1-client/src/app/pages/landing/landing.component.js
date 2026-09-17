@@ -1,4 +1,4 @@
-import { Component } from '@angular/core';
+import { Component, HostListener } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { RouterModule } from '@angular/router';
 
@@ -7,7 +7,7 @@ import { RouterModule } from '@angular/router';
   standalone: true,
   imports: [CommonModule, RouterModule],
   template: `
-    <div class="min-h-screen bg-slate-50/50 text-slate-900 font-sans selection:bg-blue-500 selection:text-white">
+    <div id="top" class="min-h-screen bg-slate-50/50 text-slate-900 font-sans selection:bg-blue-500 selection:text-white">
       
       <!-- ========================================== -->
       <!-- STICKY NAVBAR                              -->
@@ -269,28 +269,52 @@ import { RouterModule } from '@angular/router';
           <div class="border-t border-slate-200 pt-8">
             <div class="text-center text-xs font-semibold text-slate-500 uppercase tracking-wider mb-6">Production Workload Examples</div>
             <div class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-4 text-center">
-              <div class="p-3 bg-slate-50 border border-slate-200/80 rounded-xl">
-                <div class="text-blue-600 text-lg mb-1">✉️</div>
+              <div class="p-4 bg-slate-50 border border-slate-200/80 rounded-xl flex flex-col items-center justify-center gap-3 hover:border-slate-300 transition-colors">
+                <div class="text-slate-600">
+                  <svg class="w-7 h-7" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"/>
+                  </svg>
+                </div>
                 <div class="text-xs font-bold text-slate-800">Transactional Emails</div>
               </div>
-              <div class="p-3 bg-slate-50 border border-slate-200/80 rounded-xl">
-                <div class="text-blue-600 text-lg mb-1">🖼️</div>
+              <div class="p-4 bg-slate-50 border border-slate-200/80 rounded-xl flex flex-col items-center justify-center gap-3 hover:border-slate-300 transition-colors">
+                <div class="text-slate-600">
+                  <svg class="w-7 h-7" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M15 10l4.553-2.276A1 1 0 0121 8.618v6.764a1 1 0 01-1.447.894L15 14M5 18h8a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v8a2 2 0 002 2z"/>
+                  </svg>
+                </div>
                 <div class="text-xs font-bold text-slate-800">Media Transcoding</div>
               </div>
-              <div class="p-3 bg-slate-50 border border-slate-200/80 rounded-xl">
-                <div class="text-blue-600 text-lg mb-1">📄</div>
+              <div class="p-4 bg-slate-50 border border-slate-200/80 rounded-xl flex flex-col items-center justify-center gap-3 hover:border-slate-300 transition-colors">
+                <div class="text-slate-600">
+                  <svg class="w-7 h-7" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M7 21h10a2 2 0 002-2V9.414a1 1 0 00-.293-.707l-5.414-5.414A1 1 0 0012.586 3H7a2 2 0 00-2 2v14a2 2 0 002 2z"/>
+                  </svg>
+                </div>
                 <div class="text-xs font-bold text-slate-800">PDF & Report Generation</div>
               </div>
-              <div class="p-3 bg-slate-50 border border-slate-200/80 rounded-xl">
-                <div class="text-blue-600 text-lg mb-1">📊</div>
+              <div class="p-4 bg-slate-50 border border-slate-200/80 rounded-xl flex flex-col items-center justify-center gap-3 hover:border-slate-300 transition-colors">
+                <div class="text-slate-600">
+                  <svg class="w-7 h-7" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"/>
+                  </svg>
+                </div>
                 <div class="text-xs font-bold text-slate-800">ETL & Data Pipelines</div>
               </div>
-              <div class="p-3 bg-slate-50 border border-slate-200/80 rounded-xl">
-                <div class="text-blue-600 text-lg mb-1">⏱️</div>
+              <div class="p-4 bg-slate-50 border border-slate-200/80 rounded-xl flex flex-col items-center justify-center gap-3 hover:border-slate-300 transition-colors">
+                <div class="text-slate-600">
+                  <svg class="w-7 h-7" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"/>
+                  </svg>
+                </div>
                 <div class="text-xs font-bold text-slate-800">Scheduled Cron Jobs</div>
               </div>
-              <div class="p-3 bg-slate-50 border border-slate-200/80 rounded-xl">
-                <div class="text-blue-600 text-lg mb-1">🤖</div>
+              <div class="p-4 bg-slate-50 border border-slate-200/80 rounded-xl flex flex-col items-center justify-center gap-3 hover:border-slate-300 transition-colors">
+                <div class="text-slate-600">
+                  <svg class="w-7 h-7" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M9 3v2m6-2v2M9 19v2m6-2v2M5 9H3m2 6H3m18-6h-2m2 6h-2M7 19h10a2 2 0 002-2V7a2 2 0 00-2-2H7a2 2 0 00-2 2v10a2 2 0 002 2zM9 9h6v6H9V9z"/>
+                  </svg>
+                </div>
                 <div class="text-xs font-bold text-slate-800">AI Background Tasks</div>
               </div>
             </div>
@@ -832,83 +856,83 @@ import { RouterModule } from '@angular/router';
           <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
             
             <!-- Tech 1: Frontend -->
-            <div class="p-6 bg-slate-50/50 border border-slate-200/80 rounded-xl space-y-4">
+            <div class="p-6 bg-slate-50/50 border border-slate-200/80 rounded-xl space-y-4 hover:border-slate-300 transition-colors">
               <div class="flex items-center gap-3">
-                <div class="w-8 h-8 rounded bg-red-100 text-red-600 flex items-center justify-center font-bold font-mono text-xs">NG</div>
+                <img src="https://skillicons.dev/icons?i=angular,js" alt="Angular & JS" class="h-8" />
                 <h4 class="font-bold text-slate-900 text-sm">Frontend Dashboard</h4>
               </div>
               <ul class="space-y-2 text-xs font-mono text-slate-600">
-                <li class="flex items-center gap-2"><span class="w-1.5 h-1.5 rounded-full bg-blue-500"></span>Angular 20 Standalone</li>
-                <li class="flex items-center gap-2"><span class="w-1.5 h-1.5 rounded-full bg-blue-500"></span>JavaScript Application Logic</li>
-                <li class="flex items-center gap-2"><span class="w-1.5 h-1.5 rounded-full bg-blue-500"></span>Tailwind CSS v4 Design Tokens</li>
-                <li class="flex items-center gap-2"><span class="w-1.5 h-1.5 rounded-full bg-blue-500"></span>RxJS Reactive Streams</li>
-                <li class="flex items-center gap-2"><span class="w-1.5 h-1.5 rounded-full bg-blue-500"></span>Apache ECharts Visualization</li>
+                <li class="flex items-center gap-2"><span class="w-1.5 h-1.5 rounded-full bg-slate-400"></span>Angular 20 Standalone</li>
+                <li class="flex items-center gap-2"><span class="w-1.5 h-1.5 rounded-full bg-slate-400"></span>JavaScript Application Logic</li>
+                <li class="flex items-center gap-2"><span class="w-1.5 h-1.5 rounded-full bg-slate-400"></span>Tailwind CSS v4 Design Tokens</li>
+                <li class="flex items-center gap-2"><span class="w-1.5 h-1.5 rounded-full bg-slate-400"></span>RxJS Reactive Streams</li>
+                <li class="flex items-center gap-2"><span class="w-1.5 h-1.5 rounded-full bg-slate-400"></span>Apache ECharts Visualization</li>
               </ul>
             </div>
 
             <!-- Tech 2: Backend -->
-            <div class="p-6 bg-slate-50/50 border border-slate-200/80 rounded-xl space-y-4">
+            <div class="p-6 bg-slate-50/50 border border-slate-200/80 rounded-xl space-y-4 hover:border-slate-300 transition-colors">
               <div class="flex items-center gap-3">
-                <div class="w-8 h-8 rounded bg-cyan-100 text-cyan-700 flex items-center justify-center font-bold font-mono text-xs">GO</div>
+                <img src="https://skillicons.dev/icons?i=go" alt="Go" class="h-8" />
                 <h4 class="font-bold text-slate-900 text-sm">Backend Engine</h4>
               </div>
               <ul class="space-y-2 text-xs font-mono text-slate-600">
-                <li class="flex items-center gap-2"><span class="w-1.5 h-1.5 rounded-full bg-blue-500"></span>Go (Golang 1.22 runtime)</li>
-                <li class="flex items-center gap-2"><span class="w-1.5 h-1.5 rounded-full bg-blue-500"></span>RESTful API Gateway</li>
-                <li class="flex items-center gap-2"><span class="w-1.5 h-1.5 rounded-full bg-blue-500"></span>WebSocket Real-Time Engine</li>
-                <li class="flex items-center gap-2"><span class="w-1.5 h-1.5 rounded-full bg-blue-500"></span>Goroutines & Worker Pools</li>
+                <li class="flex items-center gap-2"><span class="w-1.5 h-1.5 rounded-full bg-slate-400"></span>Go (Golang 1.22 runtime)</li>
+                <li class="flex items-center gap-2"><span class="w-1.5 h-1.5 rounded-full bg-slate-400"></span>RESTful API Gateway</li>
+                <li class="flex items-center gap-2"><span class="w-1.5 h-1.5 rounded-full bg-slate-400"></span>WebSocket Real-Time Engine</li>
+                <li class="flex items-center gap-2"><span class="w-1.5 h-1.5 rounded-full bg-slate-400"></span>Goroutines & Worker Pools</li>
               </ul>
             </div>
 
             <!-- Tech 3: Data Layer -->
-            <div class="p-6 bg-slate-50/50 border border-slate-200/80 rounded-xl space-y-4">
+            <div class="p-6 bg-slate-50/50 border border-slate-200/80 rounded-xl space-y-4 hover:border-slate-300 transition-colors">
               <div class="flex items-center gap-3">
-                <div class="w-8 h-8 rounded bg-emerald-100 text-emerald-700 flex items-center justify-center font-bold font-mono text-xs">DB</div>
+                <img src="https://skillicons.dev/icons?i=redis,postgres" alt="Redis & Postgres" class="h-8" />
                 <h4 class="font-bold text-slate-900 text-sm">Data & Message Layer</h4>
               </div>
               <ul class="space-y-2 text-xs font-mono text-slate-600">
-                <li class="flex items-center gap-2"><span class="w-1.5 h-1.5 rounded-full bg-blue-500"></span>Redis 7 In-Memory Broker</li>
-                <li class="flex items-center gap-2"><span class="w-1.5 h-1.5 rounded-full bg-blue-500"></span>Redis Pub/Sub Event Bus</li>
-                <li class="flex items-center gap-2"><span class="w-1.5 h-1.5 rounded-full bg-blue-500"></span>PostgreSQL 16 Storage</li>
+                <li class="flex items-center gap-2"><span class="w-1.5 h-1.5 rounded-full bg-slate-400"></span>Redis 7 In-Memory Broker</li>
+                <li class="flex items-center gap-2"><span class="w-1.5 h-1.5 rounded-full bg-slate-400"></span>Redis Pub/Sub Event Bus</li>
+                <li class="flex items-center gap-2"><span class="w-1.5 h-1.5 rounded-full bg-slate-400"></span>PostgreSQL 16 Storage</li>
               </ul>
             </div>
 
             <!-- Tech 4: Infrastructure -->
-            <div class="p-6 bg-slate-50/50 border border-slate-200/80 rounded-xl space-y-4">
+            <div class="p-6 bg-slate-50/50 border border-slate-200/80 rounded-xl space-y-4 hover:border-slate-300 transition-colors">
               <div class="flex items-center gap-3">
-                <div class="w-8 h-8 rounded bg-blue-100 text-blue-700 flex items-center justify-center font-bold font-mono text-xs">K8S</div>
+                <img src="https://skillicons.dev/icons?i=kubernetes,docker" alt="Kubernetes & Docker" class="h-8" />
                 <h4 class="font-bold text-slate-900 text-sm">Infrastructure</h4>
               </div>
               <ul class="space-y-2 text-xs font-mono text-slate-600">
-                <li class="flex items-center gap-2"><span class="w-1.5 h-1.5 rounded-full bg-blue-500"></span>Docker Containerization</li>
-                <li class="flex items-center gap-2"><span class="w-1.5 h-1.5 rounded-full bg-blue-500"></span>Kubernetes Orchestration</li>
-                <li class="flex items-center gap-2"><span class="w-1.5 h-1.5 rounded-full bg-blue-500"></span>Terraform Infrastructure as Code</li>
+                <li class="flex items-center gap-2"><span class="w-1.5 h-1.5 rounded-full bg-slate-400"></span>Docker Containerization</li>
+                <li class="flex items-center gap-2"><span class="w-1.5 h-1.5 rounded-full bg-slate-400"></span>Kubernetes Orchestration</li>
+                <li class="flex items-center gap-2"><span class="w-1.5 h-1.5 rounded-full bg-slate-400"></span>Terraform Infrastructure as Code</li>
               </ul>
             </div>
 
             <!-- Tech 5: CI/CD -->
-            <div class="p-6 bg-slate-50/50 border border-slate-200/80 rounded-xl space-y-4">
+            <div class="p-6 bg-slate-50/50 border border-slate-200/80 rounded-xl space-y-4 hover:border-slate-300 transition-colors">
               <div class="flex items-center gap-3">
-                <div class="w-8 h-8 rounded bg-slate-200 text-slate-800 flex items-center justify-center font-bold font-mono text-xs">CI</div>
+                <img src="https://skillicons.dev/icons?i=githubactions" alt="GitHub Actions" class="h-8" />
                 <h4 class="font-bold text-slate-900 text-sm">CI/CD Pipeline</h4>
               </div>
               <ul class="space-y-2 text-xs font-mono text-slate-600">
-                <li class="flex items-center gap-2"><span class="w-1.5 h-1.5 rounded-full bg-blue-500"></span>GitHub Actions Automated Workflows</li>
-                <li class="flex items-center gap-2"><span class="w-1.5 h-1.5 rounded-full bg-blue-500"></span>Automated Testing & Build Pipeline</li>
+                <li class="flex items-center gap-2"><span class="w-1.5 h-1.5 rounded-full bg-slate-400"></span>GitHub Actions Automated Workflows</li>
+                <li class="flex items-center gap-2"><span class="w-1.5 h-1.5 rounded-full bg-slate-400"></span>Automated Testing & Build Pipeline</li>
               </ul>
             </div>
 
             <!-- Tech 6: Observability -->
-            <div class="p-6 bg-slate-50/50 border border-slate-200/80 rounded-xl space-y-4">
+            <div class="p-6 bg-slate-50/50 border border-slate-200/80 rounded-xl space-y-4 hover:border-slate-300 transition-colors">
               <div class="flex items-center gap-3">
-                <div class="w-8 h-8 rounded bg-orange-100 text-orange-700 flex items-center justify-center font-bold font-mono text-xs">OBS</div>
+                <img src="https://skillicons.dev/icons?i=prometheus,grafana" alt="Prometheus & Grafana" class="h-8" />
                 <h4 class="font-bold text-slate-900 text-sm">Observability Stack</h4>
               </div>
               <ul class="space-y-2 text-xs font-mono text-slate-600">
-                <li class="flex items-center gap-2"><span class="w-1.5 h-1.5 rounded-full bg-blue-500"></span>Prometheus Metrics Export</li>
-                <li class="flex items-center gap-2"><span class="w-1.5 h-1.5 rounded-full bg-blue-500"></span>Grafana Real-time Dashboards</li>
-                <li class="flex items-center gap-2"><span class="w-1.5 h-1.5 rounded-full bg-blue-500"></span>Loki Log Aggregation</li>
-                <li class="flex items-center gap-2"><span class="w-1.5 h-1.5 rounded-full bg-blue-500"></span>OpenTelemetry Tracing</li>
+                <li class="flex items-center gap-2"><span class="w-1.5 h-1.5 rounded-full bg-slate-400"></span>Prometheus Metrics Export</li>
+                <li class="flex items-center gap-2"><span class="w-1.5 h-1.5 rounded-full bg-slate-400"></span>Grafana Real-time Dashboards</li>
+                <li class="flex items-center gap-2"><span class="w-1.5 h-1.5 rounded-full bg-slate-400"></span>Loki Log Aggregation</li>
+                <li class="flex items-center gap-2"><span class="w-1.5 h-1.5 rounded-full bg-slate-400"></span>OpenTelemetry Tracing</li>
               </ul>
             </div>
 
@@ -1020,10 +1044,63 @@ import { RouterModule } from '@angular/router';
         </div>
       </footer>
 
+      <!-- ========================================== -->
+      <!-- SCROLL TO TOP PROGRESS BUTTON              -->
+      <!-- ========================================== -->
+      <button 
+        (click)="scrollToSection('top')"
+        [class.opacity-0]="!showScrollToTop"
+        [class.translate-y-4]="!showScrollToTop"
+        [class.pointer-events-none]="!showScrollToTop"
+        class="fixed bottom-6 right-6 z-50 p-2 bg-white rounded-full shadow-lg border border-slate-200 transition-all duration-500 hover:shadow-2xl hover:scale-105 group opacity-100 translate-y-0 cursor-pointer flex items-center justify-center">
+        
+        <div class="relative flex items-center justify-center w-10 h-10">
+          <!-- Background Circle -->
+          <svg class="absolute inset-0 w-full h-full -rotate-90" viewBox="0 0 36 36">
+            <path
+              class="text-slate-100"
+              stroke-width="3"
+              stroke="currentColor"
+              fill="none"
+              d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831"
+            />
+            <!-- Progress Circle -->
+            <path
+              class="text-slate-900 transition-all duration-300 ease-out"
+              stroke-dasharray="100, 100"
+              [attr.stroke-dashoffset]="100 - scrollProgress"
+              stroke-width="3"
+              stroke-linecap="round"
+              stroke="currentColor"
+              fill="none"
+              d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831"
+            />
+          </svg>
+          <!-- Arrow Icon -->
+          <svg class="w-4 h-4 text-slate-900 relative z-10 transition-transform duration-300 group-hover:-translate-y-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M5 10l7-7m0 0l7 7m-7-7v18" />
+          </svg>
+        </div>
+      </button>
+
     </div>
   `,
 })
 export class LandingPageComponent {
+  showScrollToTop = false;
+  scrollProgress = 0;
+
+  @HostListener('window:scroll', [])
+  onWindowScroll() {
+    if (typeof window !== 'undefined' && typeof document !== 'undefined') {
+      const scrollY = window.scrollY || document.documentElement.scrollTop;
+      const docHeight = document.documentElement.scrollHeight - document.documentElement.clientHeight;
+      
+      this.scrollProgress = docHeight > 0 ? (scrollY / docHeight) * 100 : 0;
+      this.showScrollToTop = scrollY > 300;
+    }
+  }
+
   scrollToSection(id) {
     if (typeof document !== 'undefined') {
       const el = document.getElementById(id);

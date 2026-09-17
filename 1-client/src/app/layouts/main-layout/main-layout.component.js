@@ -55,9 +55,9 @@ import { NotificationService } from '../../services/notification.service.js';
           
           <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
             <div>
-              <label class="block font-semibold text-slate-700 dark:text-slate-300 mb-1">Job Type / Task Handler</label>
+              <label class="block font-semibold text-zinc-700 dark:text-zinc-300 mb-1">Job Type / Task Handler</label>
               <select [(ngModel)]="newJobType" name="newJobType" required
-                      class="w-full bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-slate-800 rounded-lg px-3 py-2 text-slate-800 dark:text-slate-200 focus:outline-none focus:border-blue-500 font-mono">
+                      class="w-full bg-zinc-50 dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 rounded-lg px-3 py-2 text-zinc-800 dark:text-zinc-200 focus:outline-none focus:border-zinc-400 dark:focus:border-zinc-600 font-mono transition-colors">
                 <option value="ProcessStripeInvoice">ProcessStripeInvoice</option>
                 <option value="SendWelcomeEmail">SendWelcomeEmail</option>
                 <option value="TranscodeVideoTask">TranscodeVideoTask</option>
@@ -68,9 +68,9 @@ import { NotificationService } from '../../services/notification.service.js';
             </div>
 
             <div>
-              <label class="block font-semibold text-slate-700 dark:text-slate-300 mb-1">Target Queue</label>
+              <label class="block font-semibold text-zinc-700 dark:text-zinc-300 mb-1">Target Queue</label>
               <select [(ngModel)]="newJobQueue" name="newJobQueue" required
-                      class="w-full bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-slate-800 rounded-lg px-3 py-2 text-slate-800 dark:text-slate-200 focus:outline-none focus:border-blue-500 font-mono">
+                      class="w-full bg-zinc-50 dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 rounded-lg px-3 py-2 text-zinc-800 dark:text-zinc-200 focus:outline-none focus:border-zinc-400 dark:focus:border-zinc-600 font-mono transition-colors">
                 <option value="default">default</option>
                 <option value="high-priority">high-priority</option>
                 <option value="billing-webhooks">billing-webhooks</option>
@@ -82,9 +82,9 @@ import { NotificationService } from '../../services/notification.service.js';
 
           <div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
             <div>
-              <label class="block font-semibold text-slate-700 dark:text-slate-300 mb-1">Priority Tier</label>
+              <label class="block font-semibold text-zinc-700 dark:text-zinc-300 mb-1">Priority Tier</label>
               <select [(ngModel)]="newJobPriority" name="newJobPriority"
-                      class="w-full bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-slate-800 rounded-lg px-3 py-2 text-slate-800 dark:text-slate-200 focus:outline-none focus:border-blue-500 font-mono">
+                      class="w-full bg-zinc-50 dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 rounded-lg px-3 py-2 text-zinc-800 dark:text-zinc-200 focus:outline-none focus:border-zinc-400 dark:focus:border-zinc-600 font-mono transition-colors">
                 <option value="critical">Critical</option>
                 <option value="high">High</option>
                 <option value="normal">Normal</option>
@@ -93,15 +93,15 @@ import { NotificationService } from '../../services/notification.service.js';
             </div>
 
             <div>
-              <label class="block font-semibold text-slate-700 dark:text-slate-300 mb-1">Max Retry Limit</label>
+              <label class="block font-semibold text-zinc-700 dark:text-zinc-300 mb-1">Max Retry Limit</label>
               <input type="number" [(ngModel)]="newJobRetryLimit" name="newJobRetryLimit" min="1" max="10"
-                     class="w-full bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-slate-800 rounded-lg px-3 py-2 text-slate-800 dark:text-slate-200 focus:outline-none focus:border-blue-500 font-mono">
+                     class="w-full bg-zinc-50 dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 rounded-lg px-3 py-2 text-zinc-800 dark:text-zinc-200 focus:outline-none focus:border-zinc-400 dark:focus:border-zinc-600 font-mono transition-colors">
             </div>
 
             <div>
-              <label class="block font-semibold text-slate-700 dark:text-slate-300 mb-1">Schedule Delay</label>
+              <label class="block font-semibold text-zinc-700 dark:text-zinc-300 mb-1">Schedule Delay</label>
               <select [(ngModel)]="newJobSchedule" name="newJobSchedule"
-                      class="w-full bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-slate-800 rounded-lg px-3 py-2 text-slate-800 dark:text-slate-200 focus:outline-none focus:border-blue-500 font-mono">
+                      class="w-full bg-zinc-50 dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 rounded-lg px-3 py-2 text-zinc-800 dark:text-zinc-200 focus:outline-none focus:border-zinc-400 dark:focus:border-zinc-600 font-mono transition-colors">
                 <option value="NOW">Immediate Execution</option>
                 <option value="5m">Delay 5 Minutes</option>
                 <option value="1h">Delay 1 Hour</option>
@@ -110,16 +110,16 @@ import { NotificationService } from '../../services/notification.service.js';
           </div>
 
           <div>
-            <label class="block font-semibold text-slate-700 dark:text-slate-300 mb-1">Payload JSON Object</label>
+            <label class="block font-semibold text-zinc-700 dark:text-zinc-300 mb-1">Payload JSON Object</label>
             <textarea [(ngModel)]="newJobPayloadJson" name="newJobPayloadJson" rows="4" required
-                      class="w-full bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-slate-800 rounded-lg p-3 text-xs font-mono text-emerald-600 dark:text-emerald-400 focus:outline-none focus:border-blue-500 leading-relaxed"></textarea>
+                      class="w-full bg-zinc-50 dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 rounded-lg p-3 text-xs font-mono text-zinc-600 dark:text-zinc-400 focus:outline-none focus:border-zinc-400 dark:focus:border-zinc-600 leading-relaxed transition-colors"></textarea>
           </div>
 
           <div footer class="flex items-center gap-2">
-            <button type="submit" class="px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white font-semibold rounded-lg shadow-xs transition-colors">
+            <button type="submit" class="px-4 py-2 bg-zinc-900 dark:bg-zinc-100 hover:bg-black dark:hover:bg-white text-white dark:text-zinc-900 font-semibold rounded-lg shadow-sm transition-colors">
               Submit & Enqueue
             </button>
-            <button type="button" (click)="isEnqueueModalOpen = false" class="px-4 py-2 bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300 font-medium rounded-lg">
+            <button type="button" (click)="isEnqueueModalOpen = false" class="px-4 py-2 bg-zinc-100 dark:bg-zinc-800 text-zinc-700 dark:text-zinc-300 font-medium rounded-lg hover:bg-zinc-200 dark:hover:bg-zinc-700 transition-colors">
               Cancel
             </button>
           </div>
@@ -135,44 +135,45 @@ import { NotificationService } from '../../services/notification.service.js';
         <div *if="(jobService.selectedJob$ | async) as job" class="space-y-5 font-sans">
           
           <!-- Visual Lifecycle Timeline Step Progress -->
-          <div class="bg-slate-50 dark:bg-slate-950 p-4 rounded-xl border border-slate-200/80 dark:border-slate-800">
-            <span class="text-[10px] uppercase font-mono font-semibold text-slate-400 block mb-3">Job Execution Lifecycle Step</span>
+          <!-- Visual Lifecycle Timeline Step Progress -->
+          <div class="bg-zinc-50 dark:bg-[#121214] p-5 rounded-xl border border-zinc-200/80 dark:border-zinc-800">
+            <span class="text-[10px] uppercase font-mono font-semibold text-zinc-400 block mb-4 tracking-widest">Job Execution Lifecycle Step</span>
             
             <div class="flex items-center justify-between relative">
               <!-- Horizontal Bar -->
-              <div class="absolute top-1/2 left-4 right-4 h-0.5 bg-slate-200 dark:bg-slate-800 -translate-y-1/2 -z-0"></div>
+              <div class="absolute top-1/2 left-5 right-5 h-px bg-zinc-200 dark:bg-zinc-800 -translate-y-1/2 -z-0"></div>
 
               <!-- Step 1: Created -->
-              <div class="relative z-10 flex flex-col items-center gap-1.5">
-                <div class="w-7 h-7 rounded-full bg-emerald-500 text-white flex items-center justify-center font-bold text-xs shadow-xs">✓</div>
-                <span class="text-[11px] font-medium text-slate-700 dark:text-slate-300">Created</span>
+              <div class="relative z-10 flex flex-col items-center gap-2">
+                <div class="w-6 h-6 rounded-full bg-zinc-900 dark:bg-zinc-100 text-white dark:text-zinc-900 border border-zinc-900 flex items-center justify-center font-bold text-[10px] shadow-sm">✓</div>
+                <span class="text-[11px] font-semibold text-zinc-700 dark:text-zinc-300">Created</span>
               </div>
 
               <!-- Step 2: Queued -->
-              <div class="relative z-10 flex flex-col items-center gap-1.5">
-                <div [ngClass]="job.status === 'queued' ? 'bg-blue-600 text-white' : 'bg-emerald-500 text-white'" 
-                     class="w-7 h-7 rounded-full flex items-center justify-center font-bold text-xs shadow-xs">
+              <div class="relative z-10 flex flex-col items-center gap-2">
+                <div [ngClass]="job.status === 'queued' ? 'bg-zinc-900 dark:bg-zinc-100 text-white dark:text-zinc-900 border-zinc-900 dark:border-zinc-100' : 'bg-zinc-900 dark:bg-zinc-100 text-white dark:text-zinc-900 border-zinc-900 dark:border-zinc-100'" 
+                     class="w-6 h-6 rounded-full border flex items-center justify-center font-bold text-[10px] shadow-sm">
                   {{ job.status === 'queued' ? '2' : '✓' }}
                 </div>
-                <span class="text-[11px] font-medium text-slate-700 dark:text-slate-300">Queued</span>
+                <span class="text-[11px] font-semibold text-zinc-700 dark:text-zinc-300">Queued</span>
               </div>
 
               <!-- Step 3: Processing -->
-              <div class="relative z-10 flex flex-col items-center gap-1.5">
-                <div [ngClass]="job.status === 'running' ? 'bg-blue-600 text-white animate-pulse' : (job.status === 'completed' ? 'bg-emerald-500 text-white' : (job.status === 'failed' ? 'bg-rose-500 text-white' : 'bg-slate-200 dark:bg-slate-800 text-slate-500'))" 
-                     class="w-7 h-7 rounded-full flex items-center justify-center font-bold text-xs shadow-xs">
+              <div class="relative z-10 flex flex-col items-center gap-2">
+                <div [ngClass]="job.status === 'running' ? 'bg-zinc-900 dark:bg-zinc-100 text-white dark:text-zinc-900 border-zinc-900 dark:border-zinc-100 animate-pulse' : (job.status === 'completed' ? 'bg-zinc-900 dark:bg-zinc-100 text-white dark:text-zinc-900 border-zinc-900 dark:border-zinc-100' : (job.status === 'failed' ? 'bg-zinc-900 dark:bg-zinc-100 text-white dark:text-zinc-900 border-zinc-900 dark:border-zinc-100' : 'bg-white dark:bg-[#121214] text-zinc-400 border-zinc-200 dark:border-zinc-700'))" 
+                     class="w-6 h-6 rounded-full border flex items-center justify-center font-bold text-[10px] shadow-sm">
                   {{ job.status === 'completed' ? '✓' : (job.status === 'failed' ? '!' : '3') }}
                 </div>
-                <span class="text-[11px] font-medium text-slate-700 dark:text-slate-300">Processing</span>
+                <span class="text-[11px] font-semibold text-zinc-700 dark:text-zinc-300">Processing</span>
               </div>
 
               <!-- Step 4: Outcome (Completed / Failed) -->
-              <div class="relative z-10 flex flex-col items-center gap-1.5">
-                <div [ngClass]="job.status === 'completed' ? 'bg-emerald-500 text-white' : (job.status === 'failed' ? 'bg-rose-500 text-white' : 'bg-slate-200 dark:bg-slate-800 text-slate-500')" 
-                     class="w-7 h-7 rounded-full flex items-center justify-center font-bold text-xs shadow-xs">
+              <div class="relative z-10 flex flex-col items-center gap-2">
+                <div [ngClass]="job.status === 'completed' ? 'bg-zinc-900 dark:bg-zinc-100 text-white dark:text-zinc-900 border-zinc-900 dark:border-zinc-100' : (job.status === 'failed' ? 'bg-zinc-900 dark:bg-zinc-100 text-white dark:text-zinc-900 border-zinc-900 dark:border-zinc-100' : 'bg-white dark:bg-[#121214] text-zinc-400 border-zinc-200 dark:border-zinc-700')" 
+                     class="w-6 h-6 rounded-full border flex items-center justify-center font-bold text-[10px] shadow-sm">
                   {{ job.status === 'completed' ? '✓' : (job.status === 'failed' ? '✗' : '4') }}
                 </div>
-                <span class="text-[11px] font-medium capitalize" [ngClass]="job.status === 'failed' ? 'text-rose-600 dark:text-rose-400 font-bold' : 'text-slate-700 dark:text-slate-300'">
+                <span class="text-[11px] font-semibold capitalize" [ngClass]="job.status === 'failed' ? 'text-zinc-900 dark:text-white' : 'text-zinc-700 dark:text-zinc-300'">
                   {{ job.status === 'failed' ? 'Failed' : 'Completed' }}
                 </span>
               </div>
@@ -181,46 +182,46 @@ import { NotificationService } from '../../services/notification.service.js';
           </div>
 
           <!-- Metadata Specs Grid -->
-          <div class="grid grid-cols-2 sm:grid-cols-4 gap-3 bg-white dark:bg-slate-950 p-3 rounded-lg border border-slate-200/80 dark:border-slate-800 text-xs">
+          <div class="grid grid-cols-2 sm:grid-cols-4 gap-3 bg-white dark:bg-[#09090b] p-4 rounded-xl border border-zinc-200/80 dark:border-zinc-800 text-xs">
             <div>
-              <span class="text-[10px] uppercase font-mono text-slate-400 block">Status</span>
-              <div class="mt-1">
+              <span class="text-[10px] uppercase font-mono text-zinc-400 block tracking-wider">Status</span>
+              <div class="mt-1.5">
                 <app-status-badge [status]="job.status"></app-status-badge>
               </div>
             </div>
             <div>
-              <span class="text-[10px] uppercase font-mono text-slate-400 block">Priority</span>
-              <div class="mt-1">
+              <span class="text-[10px] uppercase font-mono text-zinc-400 block tracking-wider">Priority</span>
+              <div class="mt-1.5">
                 <app-status-badge [status]="job.priority"></app-status-badge>
               </div>
             </div>
             <div>
-              <span class="text-[10px] uppercase font-mono text-slate-400 block">Queue</span>
-              <span class="font-mono font-semibold text-slate-800 dark:text-slate-200 mt-1 block truncate">{{ job.queue }}</span>
+              <span class="text-[10px] uppercase font-mono text-zinc-400 block tracking-wider">Queue</span>
+              <span class="font-mono font-semibold text-zinc-800 dark:text-zinc-200 mt-1 block truncate">{{ job.queue }}</span>
             </div>
             <div>
-              <span class="text-[10px] uppercase font-mono text-slate-400 block">Worker Assigned</span>
-              <span class="font-mono font-semibold text-slate-800 dark:text-slate-200 mt-1 block truncate">{{ job.worker }}</span>
+              <span class="text-[10px] uppercase font-mono text-zinc-400 block tracking-wider">Worker Assigned</span>
+              <span class="font-mono font-semibold text-zinc-800 dark:text-zinc-200 mt-1 block truncate">{{ job.worker }}</span>
             </div>
           </div>
 
           <!-- Error Details Callout -->
-          <div *if="job.error" class="p-3 bg-rose-50 dark:bg-rose-500/10 border border-rose-200 dark:border-rose-500/30 rounded-lg">
-            <span class="text-[10px] uppercase font-mono text-rose-600 dark:text-rose-400 font-bold block mb-1">Execution Failure Reason</span>
-            <p class="text-xs font-mono text-rose-800 dark:text-rose-200 leading-relaxed break-words">{{ job.error }}</p>
+          <div *if="job.error" class="p-3 bg-zinc-50 dark:bg-zinc-900/50 border border-zinc-200 dark:border-zinc-800 rounded-xl">
+            <span class="text-[10px] uppercase font-mono text-zinc-500 dark:text-zinc-400 font-bold block mb-1">Execution Failure Reason</span>
+            <p class="text-xs font-mono text-zinc-800 dark:text-zinc-200 leading-relaxed break-words">{{ job.error }}</p>
           </div>
 
           <!-- Payload JSON -->
           <div>
-            <span class="text-xs font-semibold text-slate-700 dark:text-slate-300 uppercase tracking-wider block mb-1.5">Payload Object</span>
-            <pre class="bg-slate-50 dark:bg-slate-950 p-3 rounded-lg border border-slate-200/80 dark:border-slate-800 text-xs font-mono text-emerald-600 dark:text-emerald-400 overflow-x-auto max-h-40 leading-relaxed">{{ formatJson(job.payload) }}</pre>
+            <span class="text-[10px] font-semibold text-zinc-500 uppercase tracking-widest block mb-2">Payload Object</span>
+            <pre class="bg-zinc-50 dark:bg-[#121214] p-4 rounded-xl border border-zinc-200/80 dark:border-zinc-800 text-xs font-mono text-zinc-600 dark:text-zinc-400 overflow-x-auto max-h-40 leading-relaxed">{{ formatJson(job.payload) }}</pre>
           </div>
 
           <!-- Logs Timeline -->
           <div>
-            <span class="text-xs font-semibold text-slate-700 dark:text-slate-300 uppercase tracking-wider block mb-1.5">Execution Log Stream</span>
-            <div class="bg-slate-50 dark:bg-slate-950 rounded-lg border border-slate-200/80 dark:border-slate-800 p-3 max-h-36 overflow-y-auto space-y-1 font-mono text-xs text-slate-600 dark:text-slate-400">
-              <div *for="let log of job.logs" class="hover:bg-slate-200/50 dark:hover:bg-slate-900 px-1 py-0.5 rounded transition-colors">
+            <span class="text-[10px] font-semibold text-zinc-500 uppercase tracking-widest block mb-2">Execution Log Stream</span>
+            <div class="bg-zinc-50 dark:bg-[#121214] rounded-xl border border-zinc-200/80 dark:border-zinc-800 p-4 max-h-36 overflow-y-auto space-y-1 font-mono text-xs text-zinc-600 dark:text-zinc-400">
+              <div *for="let log of job.logs" class="hover:bg-zinc-100 dark:hover:bg-zinc-900 px-2 py-1 rounded transition-colors">
                 {{ log }}
               </div>
             </div>
@@ -228,13 +229,13 @@ import { NotificationService } from '../../services/notification.service.js';
 
           <!-- Modal Action Buttons -->
           <div footer class="flex items-center gap-2">
-            <button (click)="retryJob(job.id)" class="px-3.5 py-1.5 bg-blue-600 hover:bg-blue-700 text-white text-xs font-semibold rounded-lg shadow-xs transition-colors">
+            <button (click)="retryJob(job.id)" class="px-4 py-2 bg-zinc-900 dark:bg-zinc-100 hover:bg-black dark:hover:bg-white text-white dark:text-zinc-900 text-xs font-medium rounded-lg shadow-sm transition-colors">
               Retry Job
             </button>
-            <button (click)="cancelJob(job.id)" class="px-3.5 py-1.5 bg-rose-50 dark:bg-rose-600/20 hover:bg-rose-100 text-rose-700 dark:text-rose-300 border border-rose-200 dark:border-rose-600/30 text-xs font-semibold rounded-lg transition-colors">
+            <button (click)="cancelJob(job.id)" class="px-4 py-2 bg-zinc-50 dark:bg-zinc-900/50 hover:bg-zinc-100 dark:hover:bg-zinc-800 text-zinc-900 dark:text-white border border-zinc-200 dark:border-zinc-700 text-xs font-medium rounded-lg transition-colors">
               Cancel Job
             </button>
-            <button (click)="jobService.clearSelectedJob()" class="px-3.5 py-1.5 bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 text-slate-700 dark:text-slate-300 text-xs font-medium rounded-lg transition-colors">
+            <button (click)="jobService.clearSelectedJob()" class="px-4 py-2 bg-transparent hover:bg-zinc-100 dark:hover:bg-zinc-800 text-zinc-700 dark:text-zinc-300 text-xs font-medium rounded-lg transition-colors">
               Close
             </button>
           </div>
