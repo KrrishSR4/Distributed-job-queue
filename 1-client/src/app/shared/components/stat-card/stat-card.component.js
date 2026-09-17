@@ -6,20 +6,20 @@ import { CommonModule } from '@angular/common';
   standalone: true,
   imports: [CommonModule],
   template: `
-    <div class="bg-white dark:bg-slate-900 border border-slate-200/80 dark:border-slate-800 rounded-xl p-4 transition-all shadow-xs hover:border-slate-300 dark:hover:border-slate-700">
+    <div class="bg-white dark:bg-[#121214] border border-zinc-200/80 dark:border-zinc-800 rounded-2xl p-5 hover-lift shadow-sm">
       <div class="flex items-center justify-between">
-        <span class="text-xs font-medium text-slate-500 dark:text-slate-400 uppercase tracking-wider">{{ title }}</span>
-        <div [ngClass]="iconContainerClass" class="w-7 h-7 rounded-lg flex items-center justify-center">
+        <span class="text-xs font-semibold text-zinc-500 dark:text-zinc-400 uppercase tracking-widest">{{ title }}</span>
+        <div [ngClass]="iconContainerClass" class="w-8 h-8 rounded-lg flex items-center justify-center">
           <ng-content select="[icon]"></ng-content>
         </div>
       </div>
-      <div class="mt-2.5 flex items-baseline justify-between">
-        <div class="text-2xl font-semibold font-mono tracking-tight text-slate-900 dark:text-slate-100">{{ value }}</div>
-        <div *ngIf="trend" [ngClass]="trendClass" class="flex items-center gap-1 text-xs font-medium">
+      <div class="mt-3 flex items-baseline justify-between">
+        <div class="text-3xl font-bold font-mono tracking-tighter text-zinc-900 dark:text-zinc-100">{{ value }}</div>
+        <div *ngIf="trend" [ngClass]="trendClass" class="flex items-center gap-1 text-[11px] font-bold px-1.5 py-0.5 rounded-full bg-opacity-10 dark:bg-opacity-20">
           <span>{{ trend }}</span>
         </div>
       </div>
-      <div *ngIf="subtitle" class="mt-1 text-[11px] text-slate-500 dark:text-slate-400">
+      <div *ngIf="subtitle" class="mt-2 text-[12px] font-medium text-zinc-500 dark:text-zinc-400">
         {{ subtitle }}
       </div>
     </div>

@@ -25,19 +25,19 @@ import { NotificationService } from '../../services/notification.service.js';
     StatusBadgeComponent
   ],
   template: `
-    <div class="flex h-screen w-screen overflow-hidden bg-slate-50 dark:bg-slate-950 text-slate-900 dark:text-slate-100">
+    <div class="flex h-screen w-screen overflow-hidden bg-[#fcfcfd] dark:bg-[#09090b] text-zinc-900 dark:text-zinc-100 font-sans">
       
       <!-- Sidebar Navigation -->
       <app-sidebar [(collapsed)]="sidebarCollapsed"></app-sidebar>
 
       <!-- Main Workspace Area -->
-      <div class="flex-1 flex flex-col min-w-0 h-full overflow-hidden">
+      <div class="flex-1 flex flex-col min-w-0 h-full overflow-hidden bg-white dark:bg-[#09090b] relative z-0 border-l border-zinc-200 dark:border-zinc-800/80 shadow-[-4px_0_24px_rgba(0,0,0,0.02)]">
         
         <!-- Header -->
         <app-header [title]="pageTitle" (openEnqueueModal)="isEnqueueModalOpen = true"></app-header>
 
         <!-- Scrollable Page Content -->
-        <main class="flex-1 overflow-y-auto p-6 space-y-6">
+        <main class="flex-1 overflow-y-auto p-6 md:p-8 lg:p-10 space-y-8">
           <router-outlet></router-outlet>
         </main>
       </div>
