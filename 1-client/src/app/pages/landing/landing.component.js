@@ -81,28 +81,28 @@ import { RouterModule } from '@angular/router';
                 </svg>
               </a>
 
-              <button (click)="scrollToSection('architecture')" 
-                      class="px-5 py-3 bg-white hover:bg-slate-100 text-slate-700 border border-slate-300 rounded-xl text-sm font-semibold shadow-xs transition-colors flex items-center gap-2 cursor-pointer">
-                <span>Explore Architecture</span>
+              <a routerLink="/docs" 
+                 class="px-5 py-3 bg-white hover:bg-slate-100 text-slate-700 border border-slate-300 rounded-xl text-sm font-semibold shadow-xs transition-colors flex items-center gap-2 cursor-pointer">
+                <span>Explore Documentation</span>
                 <svg class="w-4 h-4 text-slate-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" />
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
                 </svg>
-              </button>
+              </a>
             </div>
 
             <!-- Key Metrics Bar -->
             <div class="pt-6 grid grid-cols-3 gap-4 border-t border-slate-200/80">
               <div>
-                <div class="text-xl font-bold font-mono text-slate-900">25,000+</div>
-                <div class="text-xs text-slate-500 font-sans">Jobs / sec Capacity</div>
+                <div class="text-sm font-bold font-sans text-slate-900">Concurrent</div>
+                <div class="text-xs text-slate-500 font-sans">Job Processing</div>
               </div>
               <div>
-                <div class="text-xl font-bold font-mono text-slate-900">&lt; 1.2ms</div>
-                <div class="text-xs text-slate-500 font-sans">Queue Latency</div>
+                <div class="text-sm font-bold font-sans text-slate-900">Redis-Backed</div>
+                <div class="text-xs text-slate-500 font-sans">Queue Engine</div>
               </div>
               <div>
-                <div class="text-xl font-bold font-mono text-emerald-600">99.99%</div>
-                <div class="text-xs text-slate-500 font-sans">Execution SLA</div>
+                <div class="text-sm font-bold font-sans text-emerald-600">Resilient</div>
+                <div class="text-xs text-slate-500 font-sans">Failure Recovery</div>
               </div>
             </div>
 
@@ -113,81 +113,57 @@ import { RouterModule } from '@angular/router';
             <div class="bg-white border border-slate-200 rounded-2xl p-5 shadow-lg relative overflow-hidden">
               <div class="flex items-center justify-between pb-4 border-b border-slate-100 mb-5">
                 <div class="flex items-center gap-2">
-                  <span class="w-3 h-3 rounded-full bg-rose-500"></span>
-                  <span class="w-3 h-3 rounded-full bg-amber-500"></span>
-                  <span class="w-3 h-3 rounded-full bg-emerald-500"></span>
+                  <span class="w-3 h-3 rounded-full bg-slate-200"></span>
+                  <span class="w-3 h-3 rounded-full bg-slate-200"></span>
+                  <span class="w-3 h-3 rounded-full bg-slate-200"></span>
                 </div>
-                <span class="text-[11px] font-mono text-slate-400">Live Pipeline Topology</span>
+                <span class="text-[11px] font-mono text-slate-400 uppercase tracking-wider">Architecture Preview</span>
               </div>
 
               <!-- Animated Node Flow -->
-              <div class="space-y-4 font-mono text-xs">
+              <div class="flex flex-col items-center font-mono text-xs w-full px-4">
                 
-                <!-- Node 1: Producer -->
-                <div class="p-3 bg-slate-50 border border-slate-200 rounded-lg flex items-center justify-between">
-                  <div class="flex items-center gap-3">
-                    <div class="w-8 h-8 rounded bg-blue-100 text-blue-700 flex items-center justify-center font-bold">API</div>
-                    <div>
-                      <div class="font-bold text-slate-800">Producer (Go API)</div>
-                      <div class="text-[10px] text-slate-500">HTTP POST /v1/jobs</div>
-                    </div>
-                  </div>
-                  <span class="px-2 py-0.5 rounded text-[10px] bg-emerald-100 text-emerald-700 font-semibold">202 Accepted</span>
+                <!-- Go API -->
+                <div class="w-48 p-2 bg-white border border-slate-200 shadow-sm rounded-lg flex items-center justify-center gap-2 z-10 relative">
+                  <span class="text-blue-600 font-bold">Go API</span>
                 </div>
 
-                <!-- Connector Line -->
-                <div class="flex justify-center my-1">
-                  <div class="h-6 w-0.5 bg-blue-300 relative">
-                    <div class="w-2 h-2 rounded-full bg-blue-600 absolute -left-0.75 top-2 animate-bounce"></div>
-                  </div>
+                <!-- Line -->
+                <div class="h-6 w-px bg-slate-300"></div>
+
+                <!-- Redis Queue -->
+                <div class="w-48 p-2 bg-white border border-slate-200 shadow-sm rounded-lg flex items-center justify-center gap-2 z-10 relative">
+                  <span class="text-rose-600 font-bold">Redis Queue</span>
                 </div>
 
-                <!-- Node 2: Queue Broker -->
-                <div class="p-3 bg-slate-50 border border-slate-200 rounded-lg flex items-center justify-between">
-                  <div class="flex items-center gap-3">
-                    <div class="w-8 h-8 rounded bg-rose-100 text-rose-700 flex items-center justify-center font-bold">RDS</div>
-                    <div>
-                      <div class="font-bold text-slate-800">Redis Broker</div>
-                      <div class="text-[10px] text-slate-500">Atomic FIFO & Priority ZSET</div>
-                    </div>
-                  </div>
-                  <span class="px-2 py-0.5 rounded text-[10px] bg-blue-100 text-blue-700 font-mono font-medium">1,420 Queued</span>
+                <!-- Split Lines to Workers -->
+                <div class="w-full relative h-6">
+                  <div class="absolute top-1/2 left-[16.6%] right-[16.6%] h-px bg-slate-300"></div>
+                  <div class="absolute top-0 left-1/2 w-px h-1/2 bg-slate-300"></div>
+                  <div class="absolute top-1/2 left-[16.6%] w-px h-1/2 bg-slate-300"></div>
+                  <div class="absolute top-1/2 left-1/2 w-px h-1/2 bg-slate-300"></div>
+                  <div class="absolute top-1/2 right-[16.6%] w-px h-1/2 bg-slate-300"></div>
                 </div>
 
-                <!-- Connector Line -->
-                <div class="flex justify-center my-1">
-                  <div class="h-6 w-0.5 bg-blue-300 relative">
-                    <div class="w-2 h-2 rounded-full bg-blue-600 absolute -left-0.75 top-2 animate-bounce"></div>
-                  </div>
+                <!-- Workers -->
+                <div class="w-full flex justify-between gap-3 z-10 relative">
+                  <div class="flex-1 p-2 bg-white border border-slate-200 shadow-sm rounded-lg text-center text-slate-700">Worker 1</div>
+                  <div class="flex-1 p-2 bg-white border border-slate-200 shadow-sm rounded-lg text-center text-slate-700">Worker 2</div>
+                  <div class="flex-1 p-2 bg-white border border-slate-200 shadow-sm rounded-lg text-center text-slate-700">Worker N</div>
                 </div>
 
-                <!-- Node 3: Go Workers -->
-                <div class="p-3 bg-slate-50 border border-slate-200 rounded-lg flex items-center justify-between">
-                  <div class="flex items-center gap-3">
-                    <div class="w-8 h-8 rounded bg-purple-100 text-purple-700 flex items-center justify-center font-bold">WRK</div>
-                    <div>
-                      <div class="font-bold text-slate-800">Go Workers Pool</div>
-                      <div class="text-[10px] text-slate-500">Goroutine Execution (12 Active)</div>
-                    </div>
-                  </div>
-                  <span class="px-2 py-0.5 rounded text-[10px] bg-emerald-100 text-emerald-700 font-medium">Active</span>
+                <!-- Merge Lines to PostgreSQL -->
+                <div class="w-full relative h-6">
+                  <div class="absolute top-1/2 left-[16.6%] right-[16.6%] h-px bg-slate-300"></div>
+                  <div class="absolute top-0 left-[16.6%] w-px h-1/2 bg-slate-300"></div>
+                  <div class="absolute top-0 left-1/2 w-px h-1/2 bg-slate-300"></div>
+                  <div class="absolute top-0 right-[16.6%] w-px h-1/2 bg-slate-300"></div>
+                  <div class="absolute top-1/2 left-1/2 w-px h-1/2 bg-slate-300"></div>
                 </div>
 
-                <!-- Connector Line -->
-                <div class="flex justify-center my-1">
-                  <div class="h-6 w-0.5 bg-slate-300"></div>
-                </div>
-
-                <!-- Node 4: Persistence & Live UI -->
-                <div class="p-3 bg-slate-900 text-white rounded-lg flex items-center justify-between">
-                  <div class="flex items-center gap-3">
-                    <div class="w-8 h-8 rounded bg-slate-800 text-blue-400 flex items-center justify-center font-bold">SQL</div>
-                    <div>
-                      <div class="font-bold">PostgreSQL & Live Dashboard</div>
-                      <div class="text-[10px] text-slate-400">WebSocket Event Broadcast</div>
-                    </div>
-                  </div>
-                  <span class="px-2 py-0.5 rounded text-[10px] bg-emerald-500/20 text-emerald-300 font-semibold border border-emerald-500/30">Synced</span>
+                <!-- PostgreSQL -->
+                <div class="w-48 p-2 bg-white border border-slate-200 shadow-sm rounded-lg flex items-center justify-center gap-2 z-10 relative">
+                  <span class="text-emerald-600 font-bold">PostgreSQL</span>
                 </div>
 
               </div>
@@ -393,18 +369,18 @@ import { RouterModule } from '@angular/router';
             </div>
           </div>
 
-          <!-- Workflow 2: Failure & DLQ Path -->
+          <!-- Workflow 2: Failure & Recovery Path -->
           <div class="bg-white border border-slate-200/80 rounded-2xl p-6 shadow-sm">
             <div class="flex items-center justify-between pb-4 border-b border-slate-100 mb-6">
               <span class="text-xs font-bold text-slate-900 font-mono">FAILURE & RECOVERY PIPELINE</span>
-              <span class="px-2 py-0.5 bg-rose-50 text-rose-700 text-[10px] font-bold rounded border border-rose-200">DLQ Quarantine</span>
+              <span class="px-2 py-0.5 bg-amber-50 text-amber-700 text-[10px] font-bold rounded border border-amber-200">Retry Mechanism</span>
             </div>
 
             <div class="space-y-4 font-mono text-xs">
               <div class="flex items-start gap-3">
                 <div class="w-6 h-6 rounded-full bg-purple-100 text-purple-700 font-bold flex items-center justify-center flex-shrink-0">1</div>
                 <div class="p-3 bg-slate-50 rounded-lg flex-1 border border-slate-200/60">
-                  <div class="font-bold text-slate-900">Go Worker Execution</div>
+                  <div class="font-bold text-slate-900">Go Worker Processing</div>
                   <div class="text-[11px] text-slate-500">Attempts processing payload</div>
                 </div>
               </div>
@@ -420,13 +396,21 @@ import { RouterModule } from '@angular/router';
               <div class="flex items-start gap-3">
                 <div class="w-6 h-6 rounded-full bg-blue-100 text-blue-700 font-bold flex items-center justify-center flex-shrink-0">3</div>
                 <div class="p-3 bg-slate-50 rounded-lg flex-1 border border-slate-200/60">
-                  <div class="font-bold text-slate-900">Exponential Backoff Retry</div>
-                  <div class="text-[11px] text-slate-500">Calculates delay (2s ➔ 4s ➔ 8s)</div>
+                  <div class="font-bold text-slate-900">Retry Allowed? (YES)</div>
+                  <div class="text-[11px] text-slate-500">Checks current attempts vs max_attempts</div>
                 </div>
               </div>
 
               <div class="flex items-start gap-3">
                 <div class="w-6 h-6 rounded-full bg-blue-100 text-blue-700 font-bold flex items-center justify-center flex-shrink-0">4</div>
+                <div class="p-3 bg-slate-50 rounded-lg flex-1 border border-slate-200/60">
+                  <div class="font-bold text-slate-900">Exponential Backoff Delay</div>
+                  <div class="text-[11px] text-slate-500">Calculates delay (2s ➔ 4s ➔ 8s)</div>
+                </div>
+              </div>
+
+              <div class="flex items-start gap-3">
+                <div class="w-6 h-6 rounded-full bg-blue-100 text-blue-700 font-bold flex items-center justify-center flex-shrink-0">5</div>
                 <div class="p-3 bg-slate-50 rounded-lg flex-1 border border-slate-200/60">
                   <div class="font-bold text-slate-900">Re-queued to Redis</div>
                   <div class="text-[11px] text-slate-500">Increments retry counter (Attempt 2/3)</div>
@@ -434,18 +418,10 @@ import { RouterModule } from '@angular/router';
               </div>
 
               <div class="flex items-start gap-3">
-                <div class="w-6 h-6 rounded-full bg-rose-100 text-rose-700 font-bold flex items-center justify-center flex-shrink-0">5</div>
+                <div class="w-6 h-6 rounded-full bg-rose-100 text-rose-700 font-bold flex items-center justify-center flex-shrink-0">6</div>
                 <div class="p-3 bg-rose-50 rounded-lg flex-1 border border-rose-200 text-rose-900">
                   <div class="font-bold">Max Retries Exceeded</div>
-                  <div class="text-[11px] text-rose-700">Moved to Dead Letter Queue (DLQ)</div>
-                </div>
-              </div>
-
-              <div class="flex items-start gap-3">
-                <div class="w-6 h-6 rounded-full bg-slate-900 text-white font-bold flex items-center justify-center flex-shrink-0">6</div>
-                <div class="p-3 bg-slate-900 text-white rounded-lg flex-1">
-                  <div class="font-bold">Admin Replay & Stack Inspection</div>
-                  <div class="text-[11px] text-slate-300">Inspect error trace in DLQ Dashboard & Re-run</div>
+                  <div class="text-[11px] text-rose-700">Final failure (FUTURE: Move to DLQ)</div>
                 </div>
               </div>
             </div>
@@ -468,7 +444,8 @@ import { RouterModule } from '@angular/router';
           <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
             
             <!-- Feature 1 -->
-            <div class="p-5 bg-slate-50/50 border border-slate-200/80 rounded-xl hover:border-blue-300 hover:shadow-sm transition-all group">
+            <div class="p-5 bg-slate-50/50 border border-slate-200/80 rounded-xl hover:border-blue-300 hover:shadow-sm transition-all group relative">
+              <div class="absolute top-3 right-3 text-[9px] font-bold tracking-widest text-emerald-600 bg-emerald-100 px-1.5 py-0.5 rounded">IMPLEMENTED</div>
               <div class="w-10 h-10 rounded-lg bg-blue-100 text-blue-700 flex items-center justify-center mb-4 group-hover:bg-blue-600 group-hover:text-white transition-colors">
                 <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                   <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10" />
@@ -476,12 +453,13 @@ import { RouterModule } from '@angular/router';
               </div>
               <h4 class="text-sm font-bold text-slate-900 mb-1">Distributed Workers</h4>
               <p class="text-xs text-slate-600 leading-relaxed">
-                Distribute jobs across multiple Go workers for parallel processing.
+                Distribute jobs across multiple Go worker goroutines for parallel processing.
               </p>
             </div>
 
             <!-- Feature 2 -->
-            <div class="p-5 bg-slate-50/50 border border-slate-200/80 rounded-xl hover:border-blue-300 hover:shadow-sm transition-all group">
+            <div class="p-5 bg-slate-50/50 border border-slate-200/80 rounded-xl hover:border-blue-300 hover:shadow-sm transition-all group relative">
+              <div class="absolute top-3 right-3 text-[9px] font-bold tracking-widest text-emerald-600 bg-emerald-100 px-1.5 py-0.5 rounded">IMPLEMENTED</div>
               <div class="w-10 h-10 rounded-lg bg-blue-100 text-blue-700 flex items-center justify-center mb-4 group-hover:bg-blue-600 group-hover:text-white transition-colors">
                 <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                   <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
@@ -489,13 +467,14 @@ import { RouterModule } from '@angular/router';
               </div>
               <h4 class="text-sm font-bold text-slate-900 mb-1">Reliable Retries</h4>
               <p class="text-xs text-slate-600 leading-relaxed">
-                Automatically retry failed jobs with controlled retry policies and backoff.
+                Automatically retry failed jobs with controlled retry policies and exponential backoff.
               </p>
             </div>
 
             <!-- Feature 3 -->
-            <div class="p-5 bg-slate-50/50 border border-slate-200/80 rounded-xl hover:border-blue-300 hover:shadow-sm transition-all group">
-              <div class="w-10 h-10 rounded-lg bg-blue-100 text-blue-700 flex items-center justify-center mb-4 group-hover:bg-blue-600 group-hover:text-white transition-colors">
+            <div class="p-5 bg-slate-50/50 border border-slate-200/80 rounded-xl group relative opacity-80">
+              <div class="absolute top-3 right-3 text-[9px] font-bold tracking-widest text-amber-600 bg-amber-100 px-1.5 py-0.5 rounded">PLANNED</div>
+              <div class="w-10 h-10 rounded-lg bg-slate-100 text-slate-500 flex items-center justify-center mb-4">
                 <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                   <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z" />
                 </svg>
@@ -507,8 +486,9 @@ import { RouterModule } from '@angular/router';
             </div>
 
             <!-- Feature 4 -->
-            <div class="p-5 bg-slate-50/50 border border-slate-200/80 rounded-xl hover:border-blue-300 hover:shadow-sm transition-all group">
-              <div class="w-10 h-10 rounded-lg bg-blue-100 text-blue-700 flex items-center justify-center mb-4 group-hover:bg-blue-600 group-hover:text-white transition-colors">
+            <div class="p-5 bg-slate-50/50 border border-slate-200/80 rounded-xl group relative opacity-80">
+              <div class="absolute top-3 right-3 text-[9px] font-bold tracking-widest text-amber-600 bg-amber-100 px-1.5 py-0.5 rounded">PLANNED</div>
+              <div class="w-10 h-10 rounded-lg bg-slate-100 text-slate-500 flex items-center justify-center mb-4">
                 <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                   <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
                 </svg>
@@ -520,8 +500,9 @@ import { RouterModule } from '@angular/router';
             </div>
 
             <!-- Feature 5 -->
-            <div class="p-5 bg-slate-50/50 border border-slate-200/80 rounded-xl hover:border-blue-300 hover:shadow-sm transition-all group">
-              <div class="w-10 h-10 rounded-lg bg-rose-100 text-rose-700 flex items-center justify-center mb-4 group-hover:bg-rose-600 group-hover:text-white transition-colors">
+            <div class="p-5 bg-slate-50/50 border border-slate-200/80 rounded-xl group relative opacity-80">
+              <div class="absolute top-3 right-3 text-[9px] font-bold tracking-widest text-amber-600 bg-amber-100 px-1.5 py-0.5 rounded">PLANNED</div>
+              <div class="w-10 h-10 rounded-lg bg-slate-100 text-slate-500 flex items-center justify-center mb-4">
                 <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                   <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
                 </svg>
@@ -533,34 +514,37 @@ import { RouterModule } from '@angular/router';
             </div>
 
             <!-- Feature 6 -->
-            <div class="p-5 bg-slate-50/50 border border-slate-200/80 rounded-xl hover:border-blue-300 hover:shadow-sm transition-all group">
-              <div class="w-10 h-10 rounded-lg bg-blue-100 text-blue-700 flex items-center justify-center mb-4 group-hover:bg-blue-600 group-hover:text-white transition-colors">
+            <div class="p-5 bg-slate-50/50 border border-slate-200/80 rounded-xl group relative opacity-80">
+              <div class="absolute top-3 right-3 text-[9px] font-bold tracking-widest text-amber-600 bg-amber-100 px-1.5 py-0.5 rounded">PLANNED</div>
+              <div class="w-10 h-10 rounded-lg bg-slate-100 text-slate-500 flex items-center justify-center mb-4">
                 <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                   <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" />
                 </svg>
               </div>
-              <h4 class="text-sm font-bold text-slate-900 mb-1">Real-Time Monitoring</h4>
+              <h4 class="text-sm font-bold text-slate-900 mb-1">Live Push Engine</h4>
               <p class="text-xs text-slate-600 leading-relaxed">
-                Track job execution, workers and queues through live dashboard updates.
+                WebSocket based real-time execution updates pushed directly to the UI.
               </p>
             </div>
 
             <!-- Feature 7 -->
-            <div class="p-5 bg-slate-50/50 border border-slate-200/80 rounded-xl hover:border-blue-300 hover:shadow-sm transition-all group">
-              <div class="w-10 h-10 rounded-lg bg-blue-100 text-blue-700 flex items-center justify-center mb-4 group-hover:bg-blue-600 group-hover:text-white transition-colors">
+            <div class="p-5 bg-slate-50/50 border border-slate-200/80 rounded-xl group relative opacity-80">
+              <div class="absolute top-3 right-3 text-[9px] font-bold tracking-widest text-amber-600 bg-amber-100 px-1.5 py-0.5 rounded">PLANNED</div>
+              <div class="w-10 h-10 rounded-lg bg-slate-100 text-slate-500 flex items-center justify-center mb-4">
                 <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                   <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7h12m0 0l-4-4m4 4l-4 4m0 6H4m0 0l4 4m-4-4l4-4" />
                 </svg>
               </div>
               <h4 class="text-sm font-bold text-slate-900 mb-1">Horizontal Scaling</h4>
               <p class="text-xs text-slate-600 leading-relaxed">
-                Scale API instances and workers independently as workload increases.
+                Scale API instances and workers across multiple cloud nodes dynamically.
               </p>
             </div>
 
             <!-- Feature 8 -->
-            <div class="p-5 bg-slate-50/50 border border-slate-200/80 rounded-xl hover:border-blue-300 hover:shadow-sm transition-all group">
-              <div class="w-10 h-10 rounded-lg bg-blue-100 text-blue-700 flex items-center justify-center mb-4 group-hover:bg-blue-600 group-hover:text-white transition-colors">
+            <div class="p-5 bg-slate-50/50 border border-slate-200/80 rounded-xl group relative opacity-80">
+              <div class="absolute top-3 right-3 text-[9px] font-bold tracking-widest text-amber-600 bg-amber-100 px-1.5 py-0.5 rounded">PLANNED</div>
+              <div class="w-10 h-10 rounded-lg bg-slate-100 text-slate-500 flex items-center justify-center mb-4">
                 <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                   <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
                   <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
@@ -568,7 +552,7 @@ import { RouterModule } from '@angular/router';
               </div>
               <h4 class="text-sm font-bold text-slate-900 mb-1">Observability</h4>
               <p class="text-xs text-slate-600 leading-relaxed">
-                Expose metrics, logs and traces for understanding system health.
+                Expose Prometheus metrics, Grafana dashboards, and OpenTelemetry traces.
               </p>
             </div>
 
@@ -619,15 +603,15 @@ import { RouterModule } from '@angular/router';
               </div>
             </div>
 
-            <!-- Quarantine DLQ Path Lifecycle -->
+            <!-- Final Failure Path Lifecycle -->
             <div class="p-4 bg-slate-50 border border-slate-200/60 rounded-xl space-y-2">
-              <div class="text-xs font-bold text-slate-800">3. DLQ Isolation Path</div>
+              <div class="text-xs font-bold text-slate-800">3. Final Failure Path (FUTURE: DLQ)</div>
               <div class="flex items-center gap-2 font-mono text-xs">
                 <span class="px-2 py-0.5 rounded bg-rose-100 text-rose-800">Failed</span>
                 <span>➔</span>
                 <span class="px-2 py-0.5 rounded bg-rose-200 text-rose-900 font-bold">Max Retries</span>
                 <span>➔</span>
-                <span class="px-2.5 py-0.5 rounded bg-slate-900 text-rose-300 font-bold">Dead Letter Queue</span>
+                <span class="px-2.5 py-0.5 rounded bg-slate-900 text-rose-300 font-bold">Final Failure</span>
               </div>
             </div>
           </div>
@@ -657,9 +641,9 @@ import { RouterModule } from '@angular/router';
             </div>
 
             <div class="p-4 bg-white border border-slate-200/80 rounded-xl space-y-1.5">
-              <div class="text-xs font-bold text-slate-900">Worker Heartbeat & Recovery</div>
+              <div class="text-xs font-bold text-slate-900">Worker Concurrency Control</div>
               <p class="text-xs text-slate-600 leading-relaxed">
-                If a worker node crashes mid-execution, orphaned jobs are detected and automatically re-queued.
+                Goroutines manage job processing asynchronously, allowing efficient local concurrency without blocking.
               </p>
             </div>
 
@@ -689,62 +673,75 @@ import { RouterModule } from '@angular/router';
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           
           <div class="text-center max-w-3xl mx-auto space-y-3 mb-16">
-            <h2 class="text-xs font-mono font-semibold uppercase tracking-wider text-blue-600">Elastic Architecture</h2>
-            <h3 class="text-2xl sm:text-3xl font-bold text-slate-900 tracking-tight">Independent Horizontal Scaling</h3>
+            <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-slate-100 border border-slate-200 text-slate-700 text-[10px] font-mono font-bold tracking-wider mb-2">
+              PLANNED ARCHITECTURE
+            </div>
+            <h3 class="text-2xl sm:text-3xl font-bold text-slate-900 tracking-tight">Horizontal Scaling Model</h3>
             <p class="text-sm text-slate-600 leading-relaxed">
-              API servers and workers scale independently. Scaling execution capacity requires zero changes or downtime on the API gateway.
+              <strong>Current Implementation:</strong> Single Go API & Configurable Goroutine Worker Pool.<br>
+              <strong>Future Scaling:</strong> API servers and workers scale independently. Scaling execution capacity requires zero changes or downtime on the API gateway.
             </p>
           </div>
 
           <!-- Scaling Topology Visual -->
-          <div class="bg-slate-900 text-white rounded-2xl p-6 sm:p-8 max-w-4xl mx-auto font-mono text-xs shadow-xl mb-12">
-            <div class="text-center text-slate-400 text-[11px] mb-6 border-b border-slate-800 pb-3">
-              CLUSTER TOPOLOGY & LOAD BALANCING
+          <div class="bg-white border border-slate-200 rounded-2xl p-6 sm:p-8 max-w-4xl mx-auto font-mono text-xs shadow-sm mb-12">
+            <div class="text-center font-bold text-slate-900 text-[11px] tracking-widest uppercase mb-6 border-b border-slate-100 pb-3">
+              PLANNED CLUSTER TOPOLOGY
             </div>
 
             <!-- Load Balancer -->
-            <div class="flex justify-center mb-4">
-              <div class="px-6 py-2 bg-blue-600 text-white font-bold rounded-lg border border-blue-400 shadow-sm">
-                NGINX / Cloud Load Balancer
+            <div class="flex justify-center mb-4 relative z-10">
+              <div class="px-6 py-2 bg-blue-50 text-blue-700 font-bold rounded-lg border border-blue-200 shadow-sm">
+                Load Balancer
               </div>
             </div>
 
-            <!-- Down Arrows -->
-            <div class="flex justify-center mb-4 text-blue-400 font-bold">
-              <span>│ &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; │ &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; │</span>
+            <!-- Split Lines from LB to API -->
+            <div class="w-full relative h-8 -mt-4 mb-2 z-0">
+               <div class="absolute top-1/2 left-[16.6%] right-[16.6%] h-px bg-slate-200"></div>
+               <div class="absolute top-0 left-1/2 w-px h-1/2 bg-slate-200"></div>
+               <div class="absolute top-1/2 left-[16.6%] w-px h-1/2 bg-slate-200"></div>
+               <div class="absolute top-1/2 left-1/2 w-px h-1/2 bg-slate-200"></div>
+               <div class="absolute top-1/2 right-[16.6%] w-px h-1/2 bg-slate-200"></div>
             </div>
 
             <!-- API Instances Layer -->
-            <div class="grid grid-cols-3 gap-4 text-center mb-6">
-              <div class="p-3 bg-slate-800 border border-slate-700 rounded-lg text-slate-200">
-                Go API Server 1
-              </div>
-              <div class="p-3 bg-slate-800 border border-slate-700 rounded-lg text-slate-200">
-                Go API Server 2
-              </div>
-              <div class="p-3 bg-slate-800 border border-slate-700 rounded-lg text-slate-200">
-                Go API Server N
-              </div>
+            <div class="flex justify-between gap-4 text-center mb-2 z-10 relative px-4">
+              <div class="flex-1 p-3 bg-white border border-slate-200 shadow-sm rounded-lg text-slate-700 font-bold">API 1</div>
+              <div class="flex-1 p-3 bg-white border border-slate-200 shadow-sm rounded-lg text-slate-700 font-bold">API 2</div>
+              <div class="flex-1 p-3 bg-white border border-slate-200 shadow-sm rounded-lg text-slate-700 font-bold">API N</div>
+            </div>
+
+            <!-- Merge Lines from API to Redis -->
+            <div class="w-full relative h-8 -mt-2 mb-4 z-0">
+               <div class="absolute top-1/2 left-[16.6%] right-[16.6%] h-px bg-slate-200"></div>
+               <div class="absolute top-0 left-[16.6%] w-px h-1/2 bg-slate-200"></div>
+               <div class="absolute top-0 left-1/2 w-px h-1/2 bg-slate-200"></div>
+               <div class="absolute top-0 right-[16.6%] w-px h-1/2 bg-slate-200"></div>
+               <div class="absolute top-1/2 left-1/2 w-px h-1/2 bg-slate-200"></div>
             </div>
 
             <!-- Central Redis Queue -->
-            <div class="flex justify-center my-6">
-              <div class="px-8 py-3 bg-rose-950/80 border border-rose-500 text-rose-300 font-bold rounded-xl text-center">
-                Redis Central In-Memory Broker (Priority ZSETs)
+            <div class="flex justify-center mb-4 z-10 relative">
+              <div class="px-8 py-3 bg-rose-50 border border-rose-200 text-rose-700 font-bold rounded-xl text-center shadow-sm">
+                Redis Queue Broker
               </div>
             </div>
 
+            <!-- Split Lines from Redis to Workers -->
+            <div class="w-full relative h-8 -mt-4 mb-2 z-0">
+               <div class="absolute top-1/2 left-[16.6%] right-[16.6%] h-px bg-slate-200"></div>
+               <div class="absolute top-0 left-1/2 w-px h-1/2 bg-slate-200"></div>
+               <div class="absolute top-1/2 left-[16.6%] w-px h-1/2 bg-slate-200"></div>
+               <div class="absolute top-1/2 left-1/2 w-px h-1/2 bg-slate-200"></div>
+               <div class="absolute top-1/2 right-[16.6%] w-px h-1/2 bg-slate-200"></div>
+            </div>
+
             <!-- Worker Instances Layer -->
-            <div class="grid grid-cols-1 sm:grid-cols-3 gap-4 text-center">
-              <div class="p-3 bg-slate-800 border border-purple-500/40 rounded-lg text-purple-300">
-                Go Worker Node 1 (8 Goroutines)
-              </div>
-              <div class="p-3 bg-slate-800 border border-purple-500/40 rounded-lg text-purple-300">
-                Go Worker Node 2 (8 Goroutines)
-              </div>
-              <div class="p-3 bg-slate-800 border border-purple-500/40 rounded-lg text-purple-300">
-                Go Worker Node N (Auto-Scaled)
-              </div>
+            <div class="flex justify-between gap-4 text-center z-10 relative px-4">
+              <div class="flex-1 p-3 bg-white border border-slate-200 shadow-sm rounded-lg text-slate-700 font-bold">Worker Node 1</div>
+              <div class="flex-1 p-3 bg-white border border-slate-200 shadow-sm rounded-lg text-slate-700 font-bold">Worker Node 2</div>
+              <div class="flex-1 p-3 bg-white border border-slate-200 shadow-sm rounded-lg text-slate-700 font-bold">Worker Node N</div>
             </div>
           </div>
 
@@ -815,30 +812,7 @@ import { RouterModule } from '@angular/router';
 
           </div>
 
-          <!-- Supporting Systems -->
-          <div class="grid grid-cols-1 md:grid-cols-2 gap-6 pt-4 border-t border-slate-100">
-            
-            <div class="p-5 bg-slate-50 rounded-xl border border-slate-200/80 space-y-2">
-              <div class="text-xs font-mono font-bold text-slate-800">Observability Stack</div>
-              <div class="flex flex-wrap gap-2 text-xs font-mono">
-                <span class="px-2 py-1 bg-white border border-slate-200 rounded">Prometheus</span>
-                <span class="px-2 py-1 bg-white border border-slate-200 rounded">Grafana</span>
-                <span class="px-2 py-1 bg-white border border-slate-200 rounded">Loki</span>
-                <span class="px-2 py-1 bg-white border border-slate-200 rounded">OpenTelemetry</span>
-              </div>
-            </div>
 
-            <div class="p-5 bg-slate-50 rounded-xl border border-slate-200/80 space-y-2">
-              <div class="text-xs font-mono font-bold text-slate-800">Deployment & CI/CD</div>
-              <div class="flex flex-wrap gap-2 text-xs font-mono">
-                <span class="px-2 py-1 bg-white border border-slate-200 rounded">Docker</span>
-                <span class="px-2 py-1 bg-white border border-slate-200 rounded">Kubernetes</span>
-                <span class="px-2 py-1 bg-white border border-slate-200 rounded">GitHub Actions</span>
-                <span class="px-2 py-1 bg-white border border-slate-200 rounded">Terraform</span>
-              </div>
-            </div>
-
-          </div>
 
         </div>
       </section>
@@ -857,7 +831,7 @@ import { RouterModule } from '@angular/router';
           <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
             
             <!-- Tech 1: Frontend -->
-            <div class="p-6 bg-slate-50/50 border border-slate-200/80 rounded-xl space-y-4 hover:border-slate-300 transition-colors">
+            <div class="p-6 bg-slate-50/50 border border-slate-200/80 rounded-xl space-y-4 hover:border-slate-300 transition-colors relative">
               <div class="flex items-center gap-3">
                 <img src="https://skillicons.dev/icons?i=angular,js" alt="Angular & JS" class="h-8" />
                 <h4 class="font-bold text-slate-900 text-sm">Frontend Dashboard</h4>
@@ -866,13 +840,11 @@ import { RouterModule } from '@angular/router';
                 <li class="flex items-center gap-2"><span class="w-1.5 h-1.5 rounded-full bg-slate-400"></span>Angular 20 Standalone</li>
                 <li class="flex items-center gap-2"><span class="w-1.5 h-1.5 rounded-full bg-slate-400"></span>JavaScript Application Logic</li>
                 <li class="flex items-center gap-2"><span class="w-1.5 h-1.5 rounded-full bg-slate-400"></span>Tailwind CSS v4 Design Tokens</li>
-                <li class="flex items-center gap-2"><span class="w-1.5 h-1.5 rounded-full bg-slate-400"></span>RxJS Reactive Streams</li>
-                <li class="flex items-center gap-2"><span class="w-1.5 h-1.5 rounded-full bg-slate-400"></span>Apache ECharts Visualization</li>
               </ul>
             </div>
 
             <!-- Tech 2: Backend -->
-            <div class="p-6 bg-slate-50/50 border border-slate-200/80 rounded-xl space-y-4 hover:border-slate-300 transition-colors">
+            <div class="p-6 bg-slate-50/50 border border-slate-200/80 rounded-xl space-y-4 hover:border-slate-300 transition-colors relative">
               <div class="flex items-center gap-3">
                 <img src="https://skillicons.dev/icons?i=go" alt="Go" class="h-8" />
                 <h4 class="font-bold text-slate-900 text-sm">Backend Engine</h4>
@@ -880,51 +852,50 @@ import { RouterModule } from '@angular/router';
               <ul class="space-y-2 text-xs font-mono text-slate-600">
                 <li class="flex items-center gap-2"><span class="w-1.5 h-1.5 rounded-full bg-slate-400"></span>Go (Golang 1.22 runtime)</li>
                 <li class="flex items-center gap-2"><span class="w-1.5 h-1.5 rounded-full bg-slate-400"></span>RESTful API Gateway</li>
-                <li class="flex items-center gap-2"><span class="w-1.5 h-1.5 rounded-full bg-slate-400"></span>WebSocket Real-Time Engine</li>
                 <li class="flex items-center gap-2"><span class="w-1.5 h-1.5 rounded-full bg-slate-400"></span>Goroutines & Worker Pools</li>
               </ul>
             </div>
 
             <!-- Tech 3: Data Layer -->
-            <div class="p-6 bg-slate-50/50 border border-slate-200/80 rounded-xl space-y-4 hover:border-slate-300 transition-colors">
+            <div class="p-6 bg-slate-50/50 border border-slate-200/80 rounded-xl space-y-4 hover:border-slate-300 transition-colors relative">
               <div class="flex items-center gap-3">
                 <img src="https://skillicons.dev/icons?i=redis,postgres" alt="Redis & Postgres" class="h-8" />
                 <h4 class="font-bold text-slate-900 text-sm">Data & Message Layer</h4>
               </div>
               <ul class="space-y-2 text-xs font-mono text-slate-600">
-                <li class="flex items-center gap-2"><span class="w-1.5 h-1.5 rounded-full bg-slate-400"></span>Redis 7 In-Memory Broker</li>
-                <li class="flex items-center gap-2"><span class="w-1.5 h-1.5 rounded-full bg-slate-400"></span>Redis Pub/Sub Event Bus</li>
+                <li class="flex items-center gap-2"><span class="w-1.5 h-1.5 rounded-full bg-slate-400"></span>Redis In-Memory Queue (List)</li>
                 <li class="flex items-center gap-2"><span class="w-1.5 h-1.5 rounded-full bg-slate-400"></span>PostgreSQL 16 Storage</li>
               </ul>
             </div>
 
             <!-- Tech 4: Infrastructure -->
-            <div class="p-6 bg-slate-50/50 border border-slate-200/80 rounded-xl space-y-4 hover:border-slate-300 transition-colors">
+            <div class="p-6 bg-slate-50/50 border border-slate-200/80 rounded-xl space-y-4 hover:border-slate-300 transition-colors relative">
               <div class="flex items-center gap-3">
-                <img src="https://skillicons.dev/icons?i=kubernetes,docker" alt="Kubernetes & Docker" class="h-8" />
+                <img src="https://skillicons.dev/icons?i=docker" alt="Docker" class="h-8" />
                 <h4 class="font-bold text-slate-900 text-sm">Infrastructure</h4>
               </div>
               <ul class="space-y-2 text-xs font-mono text-slate-600">
                 <li class="flex items-center gap-2"><span class="w-1.5 h-1.5 rounded-full bg-slate-400"></span>Docker Containerization</li>
+                <li class="flex items-center gap-2"><span class="w-1.5 h-1.5 rounded-full bg-slate-400"></span>Docker Compose Workflows</li>
+              </ul>
+            </div>
+            
+            <!-- Tech 5: Planned Infrastructure -->
+            <div class="p-6 bg-slate-50/50 border border-slate-200/80 rounded-xl space-y-4 hover:border-slate-300 transition-colors relative opacity-75">
+              <div class="absolute top-3 right-3 text-[9px] font-bold tracking-widest text-amber-600 bg-amber-100 px-1.5 py-0.5 rounded">PLANNED</div>
+              <div class="flex items-center gap-3">
+                <img src="https://skillicons.dev/icons?i=kubernetes,terraform" alt="K8s & Terraform" class="h-8" />
+                <h4 class="font-bold text-slate-900 text-sm">Scale & Ops</h4>
+              </div>
+              <ul class="space-y-2 text-xs font-mono text-slate-600">
                 <li class="flex items-center gap-2"><span class="w-1.5 h-1.5 rounded-full bg-slate-400"></span>Kubernetes Orchestration</li>
                 <li class="flex items-center gap-2"><span class="w-1.5 h-1.5 rounded-full bg-slate-400"></span>Terraform Infrastructure as Code</li>
               </ul>
             </div>
 
-            <!-- Tech 5: CI/CD -->
-            <div class="p-6 bg-slate-50/50 border border-slate-200/80 rounded-xl space-y-4 hover:border-slate-300 transition-colors">
-              <div class="flex items-center gap-3">
-                <img src="https://skillicons.dev/icons?i=githubactions" alt="GitHub Actions" class="h-8" />
-                <h4 class="font-bold text-slate-900 text-sm">CI/CD Pipeline</h4>
-              </div>
-              <ul class="space-y-2 text-xs font-mono text-slate-600">
-                <li class="flex items-center gap-2"><span class="w-1.5 h-1.5 rounded-full bg-slate-400"></span>GitHub Actions Automated Workflows</li>
-                <li class="flex items-center gap-2"><span class="w-1.5 h-1.5 rounded-full bg-slate-400"></span>Automated Testing & Build Pipeline</li>
-              </ul>
-            </div>
-
-            <!-- Tech 6: Observability -->
-            <div class="p-6 bg-slate-50/50 border border-slate-200/80 rounded-xl space-y-4 hover:border-slate-300 transition-colors">
+            <!-- Tech 6: Planned Observability -->
+            <div class="p-6 bg-slate-50/50 border border-slate-200/80 rounded-xl space-y-4 hover:border-slate-300 transition-colors relative opacity-75">
+              <div class="absolute top-3 right-3 text-[9px] font-bold tracking-widest text-amber-600 bg-amber-100 px-1.5 py-0.5 rounded">PLANNED</div>
               <div class="flex items-center gap-3">
                 <img src="https://skillicons.dev/icons?i=prometheus,grafana" alt="Prometheus & Grafana" class="h-8" />
                 <h4 class="font-bold text-slate-900 text-sm">Observability Stack</h4>

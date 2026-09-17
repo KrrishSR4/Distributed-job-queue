@@ -1,4 +1,4 @@
-import { Component, Input, ViewChild, ElementRef, AfterViewInit, OnChanges, SimpleChanges } from '@angular/core';
+import { Component, Input, ViewChild } from '@angular/core';
 import mermaid from 'mermaid';
 import panzoom from 'panzoom';
 

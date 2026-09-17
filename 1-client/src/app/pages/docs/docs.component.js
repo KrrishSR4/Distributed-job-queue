@@ -600,7 +600,7 @@ flowchart TD
     }
   }
 
-  scrollTo(id: string) {
+  scrollTo(id) {
     if (typeof document === 'undefined') return;
     this.activeSection = id;
     const element = document.getElementById(id);
