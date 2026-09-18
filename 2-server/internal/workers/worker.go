@@ -5,6 +5,7 @@ import (
 	"time"
 
 	"github.com/KrrishSR4/Distributed-job-queue/server/internal/jobs"
+	"github.com/KrrishSR4/Distributed-job-queue/server/internal/models"
 	"github.com/KrrishSR4/Distributed-job-queue/server/pkg/logger"
 )
 
@@ -82,7 +83,6 @@ func (w *Worker) processJobPayload(ctx context.Context, payload *jobs.QueuePaylo
 	}
 	job.WorkerID = &w.id
 	job.StartedAt = &startedAt
-	job.Attempts++ // manually increment local struct to match DB state
 
 	logger.Info("Job processing started", "worker_id", w.id, "job_id", job.ID, "job_type", job.Type)
 
@@ -115,6 +115,35 @@ func (w *Worker) processJobPayload(ctx context.Context, payload *jobs.QueuePaylo
 				"duration", duration.String(),
 				"error", errStr,
 			)
+
+			dlqPayload := &models.DLQPayload{
+				JobID:       job.ID,
+				Type:        job.Type,
+				Attempts:    job.Attempts,
+				MaxAttempts: job.MaxAttempts,
+				FailedAt:    failedAt,
+				Reason:      errStr,
+				WorkerID:    w.id,
+			}
+
+			if err := w.queue.DeadLetter(ctx, dlqPayload); err != nil {
+				logger.Error("Failed to enqueue job to Redis DLQ",
+					"worker_id", w.id,
+					"job_id", job.ID,
+					"attempts", job.Attempts,
+					"max_attempts", job.MaxAttempts,
+					"reason", errStr,
+					"error", err,
+				)
+			} else {
+				logger.Info("Job moved to Dead Letter Queue (DLQ)",
+					"worker_id", w.id,
+					"job_id", job.ID,
+					"attempts", job.Attempts,
+					"max_attempts", job.MaxAttempts,
+					"reason", errStr,
+				)
+			}
 		}
 	} else {
 		completedAt := time.Now().UTC()

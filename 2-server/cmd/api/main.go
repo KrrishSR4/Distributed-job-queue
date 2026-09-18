@@ -54,8 +54,8 @@ func main() {
 
 	var queue jobs.Queue
 	if redisClient != nil && redisClient.IsHealthy(ctx) {
-		log.Info("Using Redis Job Queue", "key", cfg.RedisQueueKey)
-		queue = jobs.NewRedisQueue(redisClient, cfg.RedisQueueKey)
+		log.Info("Using Redis Job Queue", "key", cfg.RedisQueueKey, "dlq_key", cfg.RedisDLQKey)
+		queue = jobs.NewRedisQueue(redisClient, cfg.RedisQueueKey, cfg.RedisDLQKey)
 	} else {
 		log.Warn("Redis unavailable or disconnected. Falling back to Memory Queue for local dev testing")
 		queue = jobs.NewMemoryQueue()

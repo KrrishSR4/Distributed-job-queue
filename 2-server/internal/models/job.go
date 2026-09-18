@@ -38,6 +38,16 @@ type Job struct {
 	WorkerID    *string         `json:"worker_id,omitempty"`
 }
 
+type DLQPayload struct {
+	JobID       string    `json:"job_id"`
+	Type        string    `json:"type"`
+	Attempts    int       `json:"attempts"`
+	MaxAttempts int       `json:"max_attempts"`
+	FailedAt    time.Time `json:"failed_at"`
+	Reason      string    `json:"reason"`
+	WorkerID    string    `json:"worker_id,omitempty"`
+}
+
 type CreateJobRequest struct {
 	Type        string          `json:"type"`
 	Payload     json.RawMessage `json:"payload"`

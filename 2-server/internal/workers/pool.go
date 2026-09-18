@@ -21,13 +21,22 @@ type WorkerPool struct {
 	cancel      context.CancelFunc
 }
 
-func NewWorkerPool(workerCount int, repo jobs.Repository, queue jobs.Queue, processor JobProcessor, retryBaseDelay, retryMaxDelay time.Duration) *WorkerPool {
+func NewWorkerPool(workerCount int, repo jobs.Repository, queue jobs.Queue, processor JobProcessor, delays ...time.Duration) *WorkerPool {
 	if workerCount <= 0 {
 		workerCount = 3
 	}
 
+	baseDelay := 1 * time.Second
+	maxDelay := 30 * time.Second
+	if len(delays) > 0 && delays[0] > 0 {
+		baseDelay = delays[0]
+	}
+	if len(delays) > 1 && delays[1] > 0 {
+		maxDelay = delays[1]
+	}
+
 	ctx, cancel := context.WithCancel(context.Background())
-	retryMgr := NewRetryManager(retryBaseDelay, retryMaxDelay, queue, repo)
+	retryMgr := NewRetryManager(baseDelay, maxDelay, queue, repo)
 
 	pool := &WorkerPool{
 		workerCount: workerCount,

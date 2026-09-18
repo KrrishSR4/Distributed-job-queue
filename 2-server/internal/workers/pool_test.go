@@ -97,7 +97,7 @@ func TestWorkerJobLifecycleFailure(t *testing.T) {
 		Type:        "payment.charge",
 		Status:      models.StatusQueued,
 		Attempts:    0,
-		MaxAttempts: 3,
+		MaxAttempts: 1,
 		CreatedAt:   time.Now().UTC(),
 	}
 
