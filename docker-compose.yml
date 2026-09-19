@@ -11,16 +11,37 @@ services:
     environment:
       - NODE_ENV=development
 
-  # Phase 2: Go Backend API (Placeholder)
-  # server:
-  #   build:
-  #     context: ./2-server
-  #     dockerfile: Dockerfile
-  #   ports:
-  #     - "8080:8080"
-  #   depends_on:
-  #     - redis
-  #     - postgres
+  # Phase 2 & 4: Go Backend API
+  api:
+    build:
+      context: ./2-server
+      dockerfile: Dockerfile
+    ports:
+      - "8080:8080"
+    environment:
+      - APP_MODE=api
+      - INSTANCE_ID=api-node-1
+      - DATABASE_URL=postgres://djq:djqpassword@postgres:5432/djq_db?sslmode=disable
+      - REDIS_URL=redis://redis:6379
+      - PORT=8080
+    depends_on:
+      - redis
+      - postgres
+
+  # Phase 4: Go Backend Worker Pool
+  worker:
+    build:
+      context: ./2-server
+      dockerfile: Dockerfile
+    environment:
+      - APP_MODE=worker
+      - INSTANCE_ID=worker-node
+      - DATABASE_URL=postgres://djq:djqpassword@postgres:5432/djq_db?sslmode=disable
+      - REDIS_URL=redis://redis:6379
+      - WORKER_COUNT=3
+    depends_on:
+      - redis
+      - postgres
 
   # Phase 3: Redis Job Broker & Pub/Sub
   redis:
@@ -35,12 +56,12 @@ services:
       timeout: 3s
       retries: 5
 
-  # Phase 2: PostgreSQL Database (Placeholder)
-  # postgres:
-  #   image: postgres:16-alpine
-  #   environment:
-  #     POSTGRES_USER: djq
-  #     POSTGRES_PASSWORD: djqpassword
-  #     POSTGRES_DB: djq_db
-  #   ports:
-  #     - "5432:5432"
+  # Phase 2: PostgreSQL Database
+  postgres:
+    image: postgres:16-alpine
+    environment:
+      POSTGRES_USER: djq
+      POSTGRES_PASSWORD: djqpassword
+      POSTGRES_DB: djq_db
+    ports:
+      - "5432:5432"

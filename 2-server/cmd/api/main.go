@@ -63,31 +63,40 @@ func main() {
 	}
 
 	wsHub := websocket.NewHub()
-	go wsHub.Run(ctx)
+	if cfg.AppMode == "all" || cfg.AppMode == "api" {
+		go wsHub.Run(ctx)
+	}
 
-	jobService := jobs.NewJobService(repo, queue, wsHub)
+	var workerPool *workers.WorkerPool
+	var scheduler *workers.Scheduler
 
-	// Initialize and start Worker Pool
-	processor := workers.NewDemoProcessor(200 * time.Millisecond)
-	workerPool := workers.NewWorkerPool(cfg.WorkerCount, repo, queue, processor, cfg.RetryBaseDelay, cfg.RetryMaxDelay, cfg.JobTimeout, wsHub)
-	workerPool.Start()
+	if cfg.AppMode == "all" || cfg.AppMode == "worker" {
+		// Initialize and start Worker Pool
+		processor := workers.NewDemoProcessor(200 * time.Millisecond)
+		workerPool = workers.NewWorkerPool(cfg.WorkerCount, cfg.InstanceID, repo, queue, processor, cfg.RetryBaseDelay, cfg.RetryMaxDelay, cfg.JobTimeout, wsHub)
+		workerPool.Start()
 
-	// Initialize and start Scheduler
-	scheduler := workers.NewScheduler(repo, queue, 5*time.Second, cfg.JobRecoveryInterval, cfg.JobStaleTimeout, 50, wsHub)
-	go scheduler.Start(ctx)
+		// Initialize and start Scheduler
+		scheduler = workers.NewScheduler(repo, queue, 5*time.Second, cfg.JobRecoveryInterval, cfg.JobStaleTimeout, 50, wsHub)
+		go scheduler.Start(ctx)
+	}
 
-	healthHandler := handlers.NewHealthHandler(db, redisClient)
-	jobHandler := handlers.NewJobHandler(jobService)
+	var server *http.Server
+	if cfg.AppMode == "all" || cfg.AppMode == "api" {
+		jobService := jobs.NewJobService(repo, queue, wsHub)
+		healthHandler := handlers.NewHealthHandler(db, redisClient)
+		jobHandler := handlers.NewJobHandler(jobService)
 
-	router := routes.SetupRouter(cfg.AllowedOrigin, healthHandler, jobHandler, wsHub)
+		router := routes.SetupRouter(cfg.AllowedOrigin, healthHandler, jobHandler, wsHub)
 
-	serverAddr := fmt.Sprintf(":%s", cfg.Port)
-	server := &http.Server{
-		Addr:         serverAddr,
-		Handler:      router,
-		ReadTimeout:  15 * time.Second,
-		WriteTimeout: 15 * time.Second,
-		IdleTimeout:  60 * time.Second,
+		serverAddr := fmt.Sprintf(":%s", cfg.Port)
+		server = &http.Server{
+			Addr:         serverAddr,
+			Handler:      router,
+			ReadTimeout:  15 * time.Second,
+			WriteTimeout: 15 * time.Second,
+			IdleTimeout:  60 * time.Second,
+		}
 	}
 
 	serverCtx, serverStopCtx := context.WithCancel(context.Background())
@@ -109,14 +118,20 @@ func main() {
 			}
 		}()
 
-		if err := server.Shutdown(shutdownCtx); err != nil {
-			log.Error("HTTP server shutdown error", "error", err)
+		if server != nil {
+			if err := server.Shutdown(shutdownCtx); err != nil {
+				log.Error("HTTP server shutdown error", "error", err)
+			}
 		}
 
 		// Stop components gracefully
 		wsHub.Shutdown()
-		scheduler.Stop()
-		workerPool.Stop()
+		if scheduler != nil {
+			scheduler.Stop()
+		}
+		if workerPool != nil {
+			workerPool.Stop()
+		}
 
 		if db != nil {
 			db.Close()
@@ -129,10 +144,15 @@ func main() {
 		serverStopCtx()
 	}()
 
-	log.Info(fmt.Sprintf("Server listening and serving HTTP on http://localhost:%s", cfg.Port))
-	if err := server.ListenAndServe(); err != nil && !errors.Is(err, http.ErrServerClosed) {
-		log.Error("HTTP server failed to start", "error", err)
-		os.Exit(1)
+	if server != nil {
+		log.Info(fmt.Sprintf("Server listening and serving HTTP on http://localhost:%s", cfg.Port))
+		if err := server.ListenAndServe(); err != nil && !errors.Is(err, http.ErrServerClosed) {
+			log.Error("HTTP server failed to start", "error", err)
+			os.Exit(1)
+		}
+	} else {
+		log.Info("Running in Worker-only mode. Waiting for shutdown signal...")
+		<-ctx.Done()
 	}
 
 	<-serverCtx.Done()

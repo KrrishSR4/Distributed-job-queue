@@ -23,6 +23,8 @@ type Config struct {
 	JobTimeout          time.Duration
 	JobStaleTimeout     time.Duration
 	JobRecoveryInterval time.Duration
+	AppMode             string // "all", "api", "worker"
+	InstanceID          string
 }
 
 func Load() *Config {
@@ -86,6 +88,8 @@ func Load() *Config {
 		JobTimeout:          jobTimeout,
 		JobStaleTimeout:     jobStaleTimeout,
 		JobRecoveryInterval: jobRecoveryInterval,
+		AppMode:             getEnv("APP_MODE", "all"),
+		InstanceID:          getEnv("INSTANCE_ID", "default"),
 	}
 
 	return cfg

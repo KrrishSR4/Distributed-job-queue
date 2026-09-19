@@ -64,7 +64,7 @@ func TestDLQ_JobSuccess_NoDLQEntry(t *testing.T) {
 	_ = repo.Create(ctx, job)
 	_ = queue.Enqueue(ctx, job)
 
-	pool := NewWorkerPool(1, repo, queue, processor, 1*time.Millisecond, 2*time.Millisecond, 30*time.Second, nil)
+	pool := NewWorkerPool(1, "test-instance", repo, queue, processor, 1*time.Millisecond, 2*time.Millisecond, 30*time.Second, nil)
 	pool.Start()
 
 	time.Sleep(100 * time.Millisecond)
@@ -152,7 +152,7 @@ func TestDLQ_JobReachesMaxAttempts_MovesToDLQ(t *testing.T) {
 	schedCtx, schedCancel := context.WithCancel(ctx)
 	go scheduler.Start(schedCtx)
 
-	pool := NewWorkerPool(1, repo, queue, processor, 10*time.Millisecond, 20*time.Millisecond, 30*time.Second, nil)
+	pool := NewWorkerPool(1, "test-instance", repo, queue, processor, 10*time.Millisecond, 20*time.Millisecond, 30*time.Second, nil)
 	pool.Start()
 
 	// Wait for attempt 1 (fails) + attempt 2 (fails, max reached -> DLQ)
@@ -269,7 +269,7 @@ func TestDLQ_ConcurrentWorkersDeadLettering(t *testing.T) {
 	go scheduler.Start(schedCtx)
 
 	// 4 workers processing 10 failing jobs concurrently
-	pool := NewWorkerPool(4, repo, queue, processor, 10*time.Millisecond, 20*time.Millisecond, 30*time.Second, nil)
+	pool := NewWorkerPool(4, "test-instance", repo, queue, processor, 10*time.Millisecond, 20*time.Millisecond, 30*time.Second, nil)
 	pool.Start()
 
 	time.Sleep(300 * time.Millisecond)

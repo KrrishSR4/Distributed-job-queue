@@ -27,6 +27,7 @@ type WorkerPool struct {
 
 func NewWorkerPool(
 	workerCount int,
+	instanceID string,
 	repo jobs.Repository,
 	queue jobs.Queue,
 	processor JobProcessor,
@@ -65,7 +66,7 @@ func NewWorkerPool(
 	}
 
 	for i := 1; i <= workerCount; i++ {
-		workerID := fmt.Sprintf("worker-%d", i)
+		workerID := fmt.Sprintf("%s-worker-%d", instanceID, i)
 		worker := NewWorker(workerID, queue, repo, processor, retryMgr, jobTimeout, pub)
 		pool.workers = append(pool.workers, worker)
 	}
