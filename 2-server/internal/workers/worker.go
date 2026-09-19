@@ -3,6 +3,7 @@ package workers
 import (
 	"context"
 	"errors"
+	"fmt"
 	"time"
 
 	"github.com/KrrishSR4/Distributed-job-queue/server/internal/jobs"
@@ -11,20 +12,22 @@ import (
 )
 
 type Worker struct {
-	id        string
-	queue     jobs.Queue
-	repo      jobs.Repository
-	processor JobProcessor
-	retryMgr  *RetryManager
+	id         string
+	queue      jobs.Queue
+	repo       jobs.Repository
+	processor  JobProcessor
+	retryMgr   *RetryManager
+	jobTimeout time.Duration
 }
 
-func NewWorker(id string, queue jobs.Queue, repo jobs.Repository, processor JobProcessor, retryMgr *RetryManager) *Worker {
+func NewWorker(id string, queue jobs.Queue, repo jobs.Repository, processor JobProcessor, retryMgr *RetryManager, jobTimeout time.Duration) *Worker {
 	return &Worker{
-		id:        id,
-		queue:     queue,
-		repo:      repo,
-		processor: processor,
-		retryMgr:  retryMgr,
+		id:         id,
+		queue:      queue,
+		repo:       repo,
+		processor:  processor,
+		retryMgr:   retryMgr,
+		jobTimeout: jobTimeout,
 	}
 }
 
@@ -96,7 +99,16 @@ func (w *Worker) processJobPayload(ctx context.Context, payload *jobs.QueuePaylo
 
 	logger.Info("Job processing started", "worker_id", w.id, "job_id", job.ID, "job_type", job.Type)
 
-	procErr := w.processor.Process(ctx, job, w.id)
+	timeoutCtx, cancel := context.WithTimeout(ctx, w.jobTimeout)
+	defer cancel()
+
+	procErr := w.processor.Process(timeoutCtx, job, w.id)
+
+	// If context was cancelled due to timeout, ensure procErr reflects that
+	if timeoutCtx.Err() == context.DeadlineExceeded {
+		procErr = fmt.Errorf("job execution timed out after %s", w.jobTimeout.String())
+	}
+
 	duration := time.Since(startedAt)
 
 	if procErr != nil {

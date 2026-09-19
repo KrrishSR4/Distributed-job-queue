@@ -64,7 +64,7 @@ func TestDLQ_JobSuccess_NoDLQEntry(t *testing.T) {
 	_ = repo.Create(ctx, job)
 	_ = queue.Enqueue(ctx, job)
 
-	pool := NewWorkerPool(1, repo, queue, processor)
+	pool := NewWorkerPool(1, repo, queue, processor, 1*time.Millisecond, 2*time.Millisecond, 30*time.Second)
 	pool.Start()
 
 	time.Sleep(100 * time.Millisecond)
@@ -105,7 +105,7 @@ func TestDLQ_JobFails_WithRetriesRemaining_NoDLQEntry(t *testing.T) {
 
 	// Create worker pool with 50ms retry base delay
 	retryMgr := NewRetryManager(50*time.Millisecond, 100*time.Millisecond, queue, repo)
-	worker := NewWorker("worker-retry-1", queue, repo, processor, retryMgr)
+	worker := NewWorker("worker-retry-1", queue, repo, processor, retryMgr, 30*time.Second)
 
 	workerCtx, cancel := context.WithCancel(ctx)
 	go worker.Start(workerCtx)
@@ -148,10 +148,10 @@ func TestDLQ_JobReachesMaxAttempts_MovesToDLQ(t *testing.T) {
 	_ = repo.Create(ctx, job)
 	_ = queue.Enqueue(ctx, job)
 
-	pool := NewWorkerPool(1, repo, queue, processor, 10*time.Millisecond, 20*time.Millisecond)
+	pool := NewWorkerPool(1, repo, queue, processor, 10*time.Millisecond, 20*time.Millisecond, 30*time.Second)
 	pool.Start()
 
-	// Wait for attempt 1 (fails, retried) + attempt 2 (fails, max reached -> DLQ)
+	// Wait for attempt 1 (fails) + attempt 2 (fails, max reached -> DLQ)
 	time.Sleep(150 * time.Millisecond)
 	pool.Stop()
 
@@ -223,7 +223,7 @@ func TestDLQ_EnqueueFailureHandledGracefully(t *testing.T) {
 	_ = memQueue.Enqueue(ctx, job)
 
 	retryMgr := NewRetryManager(10*time.Millisecond, 20*time.Millisecond, errQ, repo)
-	worker := NewWorker("worker-dlq-err", errQ, repo, processor, retryMgr)
+	worker := NewWorker("worker-dlq-err", errQ, repo, processor, retryMgr, 30*time.Second)
 
 	workerCtx, cancel := context.WithCancel(ctx)
 	go worker.Start(workerCtx)
@@ -260,7 +260,7 @@ func TestDLQ_ConcurrentWorkersDeadLettering(t *testing.T) {
 	}
 
 	// 4 workers processing 10 failing jobs concurrently
-	pool := NewWorkerPool(4, repo, queue, processor, 10*time.Millisecond, 20*time.Millisecond)
+	pool := NewWorkerPool(4, repo, queue, processor, 10*time.Millisecond, 20*time.Millisecond, 30*time.Second)
 	pool.Start()
 
 	time.Sleep(200 * time.Millisecond)

@@ -25,6 +25,7 @@ type Repository interface {
 	UpdateStatusFailed(ctx context.Context, id string, failedAt time.Time, errStr string) error
 	UpdateStatusRetry(ctx context.Context, id string, errStr string) error
 	EnqueueDueScheduledJobs(ctx context.Context, until time.Time, limit int) ([]*models.Job, error)
+	RecoverStaleJobs(ctx context.Context, staleBefore time.Time, limit int) ([]*models.Job, error)
 }
 
 type PostgresRepository struct {
@@ -266,6 +267,46 @@ func (r *PostgresRepository) EnqueueDueScheduledJobs(ctx context.Context, until 
 	return jobs, nil
 }
 
+func (r *PostgresRepository) RecoverStaleJobs(ctx context.Context, staleBefore time.Time, limit int) ([]*models.Job, error) {
+	query := `
+		UPDATE jobs
+		SET status = $1, error = $2
+		WHERE id IN (
+			SELECT id FROM jobs
+			WHERE status = $3 AND started_at <= $4
+			ORDER BY started_at ASC
+			FOR UPDATE SKIP LOCKED
+			LIMIT $5
+		)
+		RETURNING id, type, payload, priority, status, attempts, max_attempts, 
+		          scheduled_at, created_at, started_at, completed_at, failed_at, error, worker_id
+	`
+	rows, err := r.pool.Query(ctx, query, models.StatusQueued, "Worker timeout or crash detected", models.StatusProcessing, staleBefore, limit)
+	if err != nil {
+		return nil, fmt.Errorf("failed to recover stale jobs: %w", err)
+	}
+	defer rows.Close()
+
+	var jobs []*models.Job
+	for rows.Next() {
+		var job models.Job
+		err := rows.Scan(
+			&job.ID, &job.Type, &job.Payload, &job.Priority, &job.Status, &job.Attempts, &job.MaxAttempts,
+			&job.ScheduledAt, &job.CreatedAt, &job.StartedAt, &job.CompletedAt, &job.FailedAt, &job.Error, &job.WorkerID,
+		)
+		if err != nil {
+			return nil, fmt.Errorf("failed to scan stale job: %w", err)
+		}
+		jobs = append(jobs, &job)
+	}
+
+	if err := rows.Err(); err != nil {
+		return nil, fmt.Errorf("error iterating stale jobs: %w", err)
+	}
+
+	return jobs, nil
+}
+
 // MemoryRepository provides an in-memory fallback for standalone testing or development without a live PostgreSQL instance.
 type MemoryRepository struct {
 	mu   sync.RWMutex
@@ -436,6 +477,34 @@ func (m *MemoryRepository) EnqueueDueScheduledJobs(ctx context.Context, until ti
 	}
 
 	return dueJobs, nil
+}
+
+func (m *MemoryRepository) RecoverStaleJobs(ctx context.Context, staleBefore time.Time, limit int) ([]*models.Job, error) {
+	m.mu.Lock()
+	defer m.mu.Unlock()
+
+	var staleJobs []*models.Job
+	for _, job := range m.jobs {
+		if job.Status == models.StatusProcessing && job.StartedAt != nil && !job.StartedAt.After(staleBefore) {
+			staleJobs = append(staleJobs, job)
+		}
+	}
+
+	sort.Slice(staleJobs, func(i, j int) bool {
+		return staleJobs[i].StartedAt.Before(*staleJobs[j].StartedAt)
+	})
+
+	if len(staleJobs) > limit {
+		staleJobs = staleJobs[:limit]
+	}
+
+	errStr := "Worker timeout or crash detected"
+	for _, job := range staleJobs {
+		job.Status = models.StatusQueued
+		job.Error = &errStr
+	}
+
+	return staleJobs, nil
 }
 
 // SeedMockData populates initial mock jobs into the MemoryRepository for rich initial data

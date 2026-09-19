@@ -65,11 +65,11 @@ func main() {
 
 	// Initialize and start Worker Pool
 	processor := workers.NewDemoProcessor(200 * time.Millisecond)
-	workerPool := workers.NewWorkerPool(cfg.WorkerCount, repo, queue, processor, cfg.RetryBaseDelay, cfg.RetryMaxDelay)
+	workerPool := workers.NewWorkerPool(cfg.WorkerCount, repo, queue, processor, cfg.RetryBaseDelay, cfg.RetryMaxDelay, cfg.JobTimeout)
 	workerPool.Start()
 
 	// Initialize and start Scheduler
-	scheduler := workers.NewScheduler(repo, queue, 5*time.Second, 50)
+	scheduler := workers.NewScheduler(repo, queue, 5*time.Second, cfg.JobRecoveryInterval, cfg.JobStaleTimeout, 50)
 	go scheduler.Start(ctx)
 
 	healthHandler := handlers.NewHealthHandler(db, redisClient)

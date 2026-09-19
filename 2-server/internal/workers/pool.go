@@ -21,18 +21,18 @@ type WorkerPool struct {
 	cancel      context.CancelFunc
 }
 
-func NewWorkerPool(workerCount int, repo jobs.Repository, queue jobs.Queue, processor JobProcessor, delays ...time.Duration) *WorkerPool {
+func NewWorkerPool(workerCount int, repo jobs.Repository, queue jobs.Queue, processor JobProcessor, baseDelay, maxDelay, jobTimeout time.Duration) *WorkerPool {
 	if workerCount <= 0 {
 		workerCount = 3
 	}
-
-	baseDelay := 1 * time.Second
-	maxDelay := 30 * time.Second
-	if len(delays) > 0 && delays[0] > 0 {
-		baseDelay = delays[0]
+	if baseDelay <= 0 {
+		baseDelay = 1 * time.Second
 	}
-	if len(delays) > 1 && delays[1] > 0 {
-		maxDelay = delays[1]
+	if maxDelay <= 0 {
+		maxDelay = 30 * time.Second
+	}
+	if jobTimeout <= 0 {
+		jobTimeout = 30 * time.Second
 	}
 
 	ctx, cancel := context.WithCancel(context.Background())
@@ -50,7 +50,7 @@ func NewWorkerPool(workerCount int, repo jobs.Repository, queue jobs.Queue, proc
 
 	for i := 1; i <= workerCount; i++ {
 		workerID := fmt.Sprintf("worker-%d", i)
-		worker := NewWorker(workerID, queue, repo, processor, retryMgr)
+		worker := NewWorker(workerID, queue, repo, processor, retryMgr, jobTimeout)
 		pool.workers = append(pool.workers, worker)
 	}
 
