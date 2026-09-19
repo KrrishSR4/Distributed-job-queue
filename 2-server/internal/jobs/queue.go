@@ -70,11 +70,17 @@ func (rq *RedisQueue) Enqueue(ctx context.Context, job *models.Job) error {
 		return fmt.Errorf("failed to marshal queue payload: %w", err)
 	}
 
-	if err := rq.client.RDB.LPush(ctx, rq.key, payloadBytes).Err(); err != nil {
-		return fmt.Errorf("failed to LPUSH job to redis queue %s: %w", rq.key, err)
+	priority := job.Priority
+	if priority == "" {
+		priority = models.PriorityMedium
+	}
+	targetKey := fmt.Sprintf("%s:%s", rq.key, priority)
+
+	if err := rq.client.RDB.LPush(ctx, targetKey, payloadBytes).Err(); err != nil {
+		return fmt.Errorf("failed to LPUSH job to redis queue %s: %w", targetKey, err)
 	}
 
-	logger.Info("Enqueued job into Redis queue", "job_id", job.ID, "queue", rq.key)
+	logger.Info("Enqueued job into Redis queue", "job_id", job.ID, "queue", targetKey, "priority", priority)
 	return nil
 }
 
@@ -83,7 +89,14 @@ func (rq *RedisQueue) Dequeue(ctx context.Context, timeout time.Duration) (*Queu
 		return nil, fmt.Errorf("redis client unavailable")
 	}
 
-	res, err := rq.client.RDB.BRPop(ctx, timeout, rq.key).Result()
+	keys := []string{
+		fmt.Sprintf("%s:%s", rq.key, models.PriorityCritical),
+		fmt.Sprintf("%s:%s", rq.key, models.PriorityHigh),
+		fmt.Sprintf("%s:%s", rq.key, models.PriorityMedium),
+		fmt.Sprintf("%s:%s", rq.key, models.PriorityLow),
+	}
+
+	res, err := rq.client.RDB.BRPop(ctx, timeout, keys...).Result()
 	if err != nil {
 		if errors.Is(err, redis.Nil) {
 			return nil, nil
@@ -158,11 +171,41 @@ func (mq *MemoryQueue) Enqueue(ctx context.Context, job *models.Job) error {
 	return nil
 }
 
+func (mq *MemoryQueue) popHighestPriority() *QueuePayload {
+	priorities := []models.JobPriority{
+		models.PriorityCritical,
+		models.PriorityHigh,
+		models.PriorityMedium,
+		models.PriorityLow,
+	}
+
+	for _, p := range priorities {
+		for i, job := range mq.Enqueued {
+			priority := job.Priority
+			if priority == "" {
+				priority = models.PriorityMedium
+			}
+			if priority == p {
+				// Remove the job from the queue
+				mq.Enqueued = append(mq.Enqueued[:i], mq.Enqueued[i+1:]...)
+				return job
+			}
+		}
+	}
+
+	// Fallback (e.g. if priority is missing or unknown, pop first)
+	if len(mq.Enqueued) > 0 {
+		job := mq.Enqueued[0]
+		mq.Enqueued = mq.Enqueued[1:]
+		return job
+	}
+
+	return nil
+}
+
 func (mq *MemoryQueue) Dequeue(ctx context.Context, timeout time.Duration) (*QueuePayload, error) {
 	mq.mu.Lock()
-	if len(mq.Enqueued) > 0 {
-		payload := mq.Enqueued[0]
-		mq.Enqueued = mq.Enqueued[1:]
+	if payload := mq.popHighestPriority(); payload != nil {
 		mq.mu.Unlock()
 		return payload, nil
 	}
@@ -173,9 +216,7 @@ func (mq *MemoryQueue) Dequeue(ctx context.Context, timeout time.Duration) (*Que
 		return nil, ctx.Err()
 	case <-mq.notify:
 		mq.mu.Lock()
-		if len(mq.Enqueued) > 0 {
-			payload := mq.Enqueued[0]
-			mq.Enqueued = mq.Enqueued[1:]
+		if payload := mq.popHighestPriority(); payload != nil {
 			mq.mu.Unlock()
 			return payload, nil
 		}
