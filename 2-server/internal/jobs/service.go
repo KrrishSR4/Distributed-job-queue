@@ -18,8 +18,9 @@ var (
 	ErrJobNotFound       = errors.New("job not found")
 	ErrInvalidID         = errors.New("invalid job id format")
 	ErrInvalidFilter     = errors.New("invalid query filter parameters")
-	ErrJobNotQueued      = errors.New("job is not in a queued state")
-	ErrJobNotCancellable = errors.New("job cannot be cancelled in its current state")
+	ErrJobNotQueued            = errors.New("job is not in a queued state")
+	ErrJobNotCancellable       = errors.New("job cannot be cancelled in its current state")
+	ErrDuplicateIdempotencyKey = errors.New("duplicate idempotency key")
 )
 
 type Service interface {
@@ -61,18 +62,31 @@ func (s *JobService) CreateJob(ctx context.Context, req models.CreateJobRequest)
 	}
 
 	job := &models.Job{
-		ID:          jobID,
-		Type:        req.Type,
-		Payload:     req.Payload,
-		Priority:    req.Priority,
-		Status:      status,
-		Attempts:    0,
-		MaxAttempts: req.MaxAttempts,
-		ScheduledAt: req.ScheduledAt,
-		CreatedAt:   now,
+		ID:             jobID,
+		Type:           req.Type,
+		Payload:        req.Payload,
+		Priority:       req.Priority,
+		Status:         status,
+		Attempts:       0,
+		MaxAttempts:    req.MaxAttempts,
+		ScheduledAt:    req.ScheduledAt,
+		CreatedAt:      now,
+		IdempotencyKey: req.IdempotencyKey,
 	}
 
-	if err := s.repo.Create(ctx, job); err != nil {
+	err := s.repo.Create(ctx, job)
+	if err != nil {
+		if errors.Is(err, ErrDuplicateIdempotencyKey) {
+			logger.Info("Duplicate idempotency key detected, returning existing job", "idempotency_key", *req.IdempotencyKey)
+			existingJob, fetchErr := s.repo.GetByIdempotencyKey(ctx, *req.IdempotencyKey)
+			if fetchErr != nil {
+				return nil, fmt.Errorf("failed to fetch existing idempotent job: %w", fetchErr)
+			}
+			if existingJob == nil {
+				return nil, fmt.Errorf("idempotent job was duplicate but not found")
+			}
+			return existingJob, nil
+		}
 		return nil, fmt.Errorf("failed to create job in database: %w", err)
 	}
 

@@ -26,6 +26,7 @@ type Repository interface {
 	UpdateStatusRetry(ctx context.Context, id string, errStr string, nextRunAt time.Time) error
 	EnqueueDueScheduledJobs(ctx context.Context, until time.Time, limit int) ([]*models.Job, error)
 	RecoverStaleJobs(ctx context.Context, staleBefore time.Time, limit int) ([]*models.Job, error)
+	GetByIdempotencyKey(ctx context.Context, key string) (*models.Job, error)
 }
 
 type PostgresRepository struct {
@@ -40,17 +41,21 @@ func (r *PostgresRepository) Create(ctx context.Context, job *models.Job) error 
 	query := `
 		INSERT INTO jobs (
 			id, type, payload, priority, status, attempts, max_attempts, 
-			scheduled_at, created_at, started_at, completed_at, failed_at, error, worker_id
+			scheduled_at, created_at, started_at, completed_at, failed_at, error, worker_id, idempotency_key
 		) VALUES (
-			$1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14
-		)
+			$1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15
+		) ON CONFLICT (idempotency_key) DO NOTHING
 	`
-	_, err := r.pool.Exec(ctx, query,
+	cmd, err := r.pool.Exec(ctx, query,
 		job.ID, job.Type, job.Payload, job.Priority, job.Status, job.Attempts, job.MaxAttempts,
-		job.ScheduledAt, job.CreatedAt, job.StartedAt, job.CompletedAt, job.FailedAt, job.Error, job.WorkerID,
+		job.ScheduledAt, job.CreatedAt, job.StartedAt, job.CompletedAt, job.FailedAt, job.Error, job.WorkerID, job.IdempotencyKey,
 	)
 	if err != nil {
 		return fmt.Errorf("failed to insert job: %w", err)
+	}
+	
+	if cmd.RowsAffected() == 0 && job.IdempotencyKey != nil {
+		return ErrDuplicateIdempotencyKey
 	}
 	return nil
 }
@@ -58,7 +63,7 @@ func (r *PostgresRepository) Create(ctx context.Context, job *models.Job) error 
 func (r *PostgresRepository) GetByID(ctx context.Context, id string) (*models.Job, error) {
 	query := `
 		SELECT id, type, payload, priority, status, attempts, max_attempts, 
-		       scheduled_at, created_at, started_at, completed_at, failed_at, error, worker_id
+		       scheduled_at, created_at, started_at, completed_at, failed_at, error, worker_id, idempotency_key
 		FROM jobs
 		WHERE id = $1
 	`
@@ -67,13 +72,36 @@ func (r *PostgresRepository) GetByID(ctx context.Context, id string) (*models.Jo
 	var job models.Job
 	err := row.Scan(
 		&job.ID, &job.Type, &job.Payload, &job.Priority, &job.Status, &job.Attempts, &job.MaxAttempts,
-		&job.ScheduledAt, &job.CreatedAt, &job.StartedAt, &job.CompletedAt, &job.FailedAt, &job.Error, &job.WorkerID,
+		&job.ScheduledAt, &job.CreatedAt, &job.StartedAt, &job.CompletedAt, &job.FailedAt, &job.Error, &job.WorkerID, &job.IdempotencyKey,
 	)
 	if err != nil {
 		if err == pgx.ErrNoRows {
 			return nil, nil
 		}
 		return nil, fmt.Errorf("failed to fetch job: %w", err)
+	}
+	return &job, nil
+}
+
+func (r *PostgresRepository) GetByIdempotencyKey(ctx context.Context, key string) (*models.Job, error) {
+	query := `
+		SELECT id, type, payload, priority, status, attempts, max_attempts, 
+		       scheduled_at, created_at, started_at, completed_at, failed_at, error, worker_id, idempotency_key
+		FROM jobs
+		WHERE idempotency_key = $1
+	`
+	row := r.pool.QueryRow(ctx, query, key)
+
+	var job models.Job
+	err := row.Scan(
+		&job.ID, &job.Type, &job.Payload, &job.Priority, &job.Status, &job.Attempts, &job.MaxAttempts,
+		&job.ScheduledAt, &job.CreatedAt, &job.StartedAt, &job.CompletedAt, &job.FailedAt, &job.Error, &job.WorkerID, &job.IdempotencyKey,
+	)
+	if err != nil {
+		if err == pgx.ErrNoRows {
+			return nil, nil
+		}
+		return nil, fmt.Errorf("failed to fetch job by idempotency key: %w", err)
 	}
 	return &job, nil
 }
@@ -112,7 +140,7 @@ func (r *PostgresRepository) List(ctx context.Context, filter models.JobListFilt
 	offset := (filter.Page - 1) * filter.Limit
 	query := fmt.Sprintf(`
 		SELECT id, type, payload, priority, status, attempts, max_attempts, 
-		       scheduled_at, created_at, started_at, completed_at, failed_at, error, worker_id
+		       scheduled_at, created_at, started_at, completed_at, failed_at, error, worker_id, idempotency_key
 		FROM jobs
 		WHERE %s
 		ORDER BY created_at DESC
@@ -132,7 +160,7 @@ func (r *PostgresRepository) List(ctx context.Context, filter models.JobListFilt
 		var job models.Job
 		err := rows.Scan(
 			&job.ID, &job.Type, &job.Payload, &job.Priority, &job.Status, &job.Attempts, &job.MaxAttempts,
-			&job.ScheduledAt, &job.CreatedAt, &job.StartedAt, &job.CompletedAt, &job.FailedAt, &job.Error, &job.WorkerID,
+			&job.ScheduledAt, &job.CreatedAt, &job.StartedAt, &job.CompletedAt, &job.FailedAt, &job.Error, &job.WorkerID, &job.IdempotencyKey,
 		)
 		if err != nil {
 			return nil, 0, fmt.Errorf("failed to scan job row: %w", err)
@@ -192,9 +220,9 @@ func (r *PostgresRepository) UpdateStatusCompleted(ctx context.Context, id strin
 	query := `
 		UPDATE jobs
 		SET status = $2, completed_at = $3
-		WHERE id = $1
+		WHERE id = $1 AND status NOT IN ($4, $5, $6)
 	`
-	_, err := r.pool.Exec(ctx, query, id, models.StatusCompleted, completedAt)
+	_, err := r.pool.Exec(ctx, query, id, models.StatusCompleted, completedAt, models.StatusCompleted, models.StatusFailed, models.StatusCancelled)
 	if err != nil {
 		return fmt.Errorf("failed to update job status to completed: %w", err)
 	}
@@ -205,9 +233,9 @@ func (r *PostgresRepository) UpdateStatusFailed(ctx context.Context, id string, 
 	query := `
 		UPDATE jobs
 		SET status = $2, failed_at = $3, error = $4
-		WHERE id = $1
+		WHERE id = $1 AND status NOT IN ($5, $6, $7)
 	`
-	_, err := r.pool.Exec(ctx, query, id, models.StatusFailed, failedAt, errStr)
+	_, err := r.pool.Exec(ctx, query, id, models.StatusFailed, failedAt, errStr, models.StatusCompleted, models.StatusFailed, models.StatusCancelled)
 	if err != nil {
 		return fmt.Errorf("failed to update job status to failed: %w", err)
 	}
@@ -239,7 +267,7 @@ func (r *PostgresRepository) EnqueueDueScheduledJobs(ctx context.Context, until 
 			LIMIT $4
 		)
 		RETURNING id, type, payload, priority, status, attempts, max_attempts, 
-		          scheduled_at, created_at, started_at, completed_at, failed_at, error, worker_id
+		          scheduled_at, created_at, started_at, completed_at, failed_at, error, worker_id, idempotency_key
 	`
 	rows, err := r.pool.Query(ctx, query, models.StatusQueued, models.StatusScheduled, until, limit)
 	if err != nil {
@@ -252,7 +280,7 @@ func (r *PostgresRepository) EnqueueDueScheduledJobs(ctx context.Context, until 
 		var job models.Job
 		err := rows.Scan(
 			&job.ID, &job.Type, &job.Payload, &job.Priority, &job.Status, &job.Attempts, &job.MaxAttempts,
-			&job.ScheduledAt, &job.CreatedAt, &job.StartedAt, &job.CompletedAt, &job.FailedAt, &job.Error, &job.WorkerID,
+			&job.ScheduledAt, &job.CreatedAt, &job.StartedAt, &job.CompletedAt, &job.FailedAt, &job.Error, &job.WorkerID, &job.IdempotencyKey,
 		)
 		if err != nil {
 			return nil, fmt.Errorf("failed to scan due scheduled job: %w", err)
@@ -279,7 +307,7 @@ func (r *PostgresRepository) RecoverStaleJobs(ctx context.Context, staleBefore t
 			LIMIT $5
 		)
 		RETURNING id, type, payload, priority, status, attempts, max_attempts, 
-		          scheduled_at, created_at, started_at, completed_at, failed_at, error, worker_id
+		          scheduled_at, created_at, started_at, completed_at, failed_at, error, worker_id, idempotency_key
 	`
 	rows, err := r.pool.Query(ctx, query, models.StatusQueued, "Worker timeout or crash detected", models.StatusProcessing, staleBefore, limit)
 	if err != nil {
@@ -292,7 +320,7 @@ func (r *PostgresRepository) RecoverStaleJobs(ctx context.Context, staleBefore t
 		var job models.Job
 		err := rows.Scan(
 			&job.ID, &job.Type, &job.Payload, &job.Priority, &job.Status, &job.Attempts, &job.MaxAttempts,
-			&job.ScheduledAt, &job.CreatedAt, &job.StartedAt, &job.CompletedAt, &job.FailedAt, &job.Error, &job.WorkerID,
+			&job.ScheduledAt, &job.CreatedAt, &job.StartedAt, &job.CompletedAt, &job.FailedAt, &job.Error, &job.WorkerID, &job.IdempotencyKey,
 		)
 		if err != nil {
 			return nil, fmt.Errorf("failed to scan stale job: %w", err)
@@ -311,17 +339,27 @@ func (r *PostgresRepository) RecoverStaleJobs(ctx context.Context, staleBefore t
 type MemoryRepository struct {
 	mu   sync.RWMutex
 	jobs map[string]*models.Job
+	keys map[string]string // map[idempotency_key]job_id
 }
 
 func NewMemoryRepository() *MemoryRepository {
 	return &MemoryRepository{
 		jobs: make(map[string]*models.Job),
+		keys: make(map[string]string),
 	}
 }
 
 func (m *MemoryRepository) Create(ctx context.Context, job *models.Job) error {
 	m.mu.Lock()
 	defer m.mu.Unlock()
+
+	if job.IdempotencyKey != nil {
+		if _, exists := m.keys[*job.IdempotencyKey]; exists {
+			return ErrDuplicateIdempotencyKey
+		}
+		m.keys[*job.IdempotencyKey] = job.ID
+	}
+
 	m.jobs[job.ID] = job
 	logger.Debug("Created job in MemoryRepository", "id", job.ID)
 	return nil
@@ -331,6 +369,21 @@ func (m *MemoryRepository) GetByID(ctx context.Context, id string) (*models.Job,
 	m.mu.RLock()
 	defer m.mu.RUnlock()
 	job, exists := m.jobs[id]
+	if !exists {
+		return nil, nil
+	}
+	return job, nil
+}
+
+func (m *MemoryRepository) GetByIdempotencyKey(ctx context.Context, key string) (*models.Job, error) {
+	m.mu.RLock()
+	defer m.mu.RUnlock()
+
+	jobID, exists := m.keys[key]
+	if !exists {
+		return nil, nil
+	}
+	job, exists := m.jobs[jobID]
 	if !exists {
 		return nil, nil
 	}
@@ -376,9 +429,15 @@ func (m *MemoryRepository) List(ctx context.Context, filter models.JobListFilter
 func (m *MemoryRepository) Delete(ctx context.Context, id string) error {
 	m.mu.Lock()
 	defer m.mu.Unlock()
-	if _, exists := m.jobs[id]; !exists {
+	job, exists := m.jobs[id]
+	if !exists {
 		return pgx.ErrNoRows
 	}
+	
+	if job.IdempotencyKey != nil {
+		delete(m.keys, *job.IdempotencyKey)
+	}
+	
 	delete(m.jobs, id)
 	return nil
 }

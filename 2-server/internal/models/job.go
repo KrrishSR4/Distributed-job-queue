@@ -37,7 +37,8 @@ type Job struct {
 	CompletedAt *time.Time      `json:"completed_at,omitempty"`
 	FailedAt    *time.Time      `json:"failed_at,omitempty"`
 	Error       *string         `json:"error,omitempty"`
-	WorkerID    *string         `json:"worker_id,omitempty"`
+	WorkerID       *string         `json:"worker_id,omitempty"`
+	IdempotencyKey *string         `json:"idempotency_key,omitempty"`
 }
 
 type DLQPayload struct {
@@ -54,8 +55,9 @@ type CreateJobRequest struct {
 	Type        string          `json:"type"`
 	Payload     json.RawMessage `json:"payload"`
 	Priority    JobPriority     `json:"priority,omitempty"`
-	MaxAttempts int             `json:"max_attempts,omitempty"`
-	ScheduledAt *time.Time      `json:"scheduled_at,omitempty"`
+	MaxAttempts    int             `json:"max_attempts,omitempty"`
+	ScheduledAt    *time.Time      `json:"scheduled_at,omitempty"`
+	IdempotencyKey *string         `json:"idempotency_key,omitempty"`
 }
 
 func (r *CreateJobRequest) Validate() error {

@@ -27,6 +27,11 @@ func (h *JobHandler) CreateJob(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	idempotencyKey := r.Header.Get("Idempotency-Key")
+	if idempotencyKey != "" {
+		req.IdempotencyKey = &idempotencyKey
+	}
+
 	job, err := h.service.CreateJob(r.Context(), req)
 	if err != nil {
 		response.ValidationError(w, err.Error())
