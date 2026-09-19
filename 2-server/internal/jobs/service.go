@@ -46,12 +46,17 @@ func (s *JobService) CreateJob(ctx context.Context, req models.CreateJobRequest)
 	jobID := uuid.New().String()
 	now := time.Now().UTC()
 
+	status := models.StatusQueued
+	if req.ScheduledAt != nil && req.ScheduledAt.After(now) {
+		status = models.StatusScheduled
+	}
+
 	job := &models.Job{
 		ID:          jobID,
 		Type:        req.Type,
 		Payload:     req.Payload,
 		Priority:    req.Priority,
-		Status:      models.StatusQueued,
+		Status:      status,
 		Attempts:    0,
 		MaxAttempts: req.MaxAttempts,
 		ScheduledAt: req.ScheduledAt,
@@ -62,7 +67,7 @@ func (s *JobService) CreateJob(ctx context.Context, req models.CreateJobRequest)
 		return nil, fmt.Errorf("failed to create job in database: %w", err)
 	}
 
-	if s.queue != nil {
+	if s.queue != nil && job.Status == models.StatusQueued {
 		if err := s.queue.Enqueue(ctx, job); err != nil {
 			logger.Error("Failed to enqueue job into Redis queue", "job_id", job.ID, "error", err)
 			return nil, fmt.Errorf("job persisted to database but failed to enqueue into queue broker")

@@ -68,6 +68,10 @@ func main() {
 	workerPool := workers.NewWorkerPool(cfg.WorkerCount, repo, queue, processor, cfg.RetryBaseDelay, cfg.RetryMaxDelay)
 	workerPool.Start()
 
+	// Initialize and start Scheduler
+	scheduler := workers.NewScheduler(repo, queue, 5*time.Second, 50)
+	go scheduler.Start(ctx)
+
 	healthHandler := handlers.NewHealthHandler(db, redisClient)
 	jobHandler := handlers.NewJobHandler(jobService)
 
@@ -105,7 +109,8 @@ func main() {
 			log.Error("HTTP server shutdown error", "error", err)
 		}
 
-		// Stop worker pool gracefully before stopping Redis and Postgres connections
+		// Stop components gracefully
+		scheduler.Stop()
 		workerPool.Stop()
 
 		if db != nil {

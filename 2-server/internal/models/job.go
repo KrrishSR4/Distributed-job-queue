@@ -11,6 +11,7 @@ type JobPriority string
 
 const (
 	StatusQueued     JobStatus = "queued"
+	StatusScheduled  JobStatus = "scheduled"
 	StatusProcessing JobStatus = "processing"
 	StatusCompleted  JobStatus = "completed"
 	StatusFailed     JobStatus = "failed"

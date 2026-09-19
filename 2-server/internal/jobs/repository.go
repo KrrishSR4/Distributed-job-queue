@@ -23,6 +23,7 @@ type Repository interface {
 	UpdateStatusCompleted(ctx context.Context, id string, completedAt time.Time) error
 	UpdateStatusFailed(ctx context.Context, id string, failedAt time.Time, errStr string) error
 	UpdateStatusRetry(ctx context.Context, id string, errStr string) error
+	EnqueueDueScheduledJobs(ctx context.Context, until time.Time, limit int) ([]*models.Job, error)
 }
 
 type PostgresRepository struct {
@@ -204,6 +205,46 @@ func (r *PostgresRepository) UpdateStatusRetry(ctx context.Context, id string, e
 	return nil
 }
 
+func (r *PostgresRepository) EnqueueDueScheduledJobs(ctx context.Context, until time.Time, limit int) ([]*models.Job, error) {
+	query := `
+		UPDATE jobs
+		SET status = $1
+		WHERE id IN (
+			SELECT id FROM jobs
+			WHERE status = $2 AND scheduled_at <= $3
+			ORDER BY scheduled_at ASC
+			FOR UPDATE SKIP LOCKED
+			LIMIT $4
+		)
+		RETURNING id, type, payload, priority, status, attempts, max_attempts, 
+		          scheduled_at, created_at, started_at, completed_at, failed_at, error, worker_id
+	`
+	rows, err := r.pool.Query(ctx, query, models.StatusQueued, models.StatusScheduled, until, limit)
+	if err != nil {
+		return nil, fmt.Errorf("failed to enqueue due scheduled jobs: %w", err)
+	}
+	defer rows.Close()
+
+	var jobs []*models.Job
+	for rows.Next() {
+		var job models.Job
+		err := rows.Scan(
+			&job.ID, &job.Type, &job.Payload, &job.Priority, &job.Status, &job.Attempts, &job.MaxAttempts,
+			&job.ScheduledAt, &job.CreatedAt, &job.StartedAt, &job.CompletedAt, &job.FailedAt, &job.Error, &job.WorkerID,
+		)
+		if err != nil {
+			return nil, fmt.Errorf("failed to scan due scheduled job: %w", err)
+		}
+		jobs = append(jobs, &job)
+	}
+
+	if err := rows.Err(); err != nil {
+		return nil, fmt.Errorf("error iterating due scheduled jobs: %w", err)
+	}
+
+	return jobs, nil
+}
+
 // MemoryRepository provides an in-memory fallback for standalone testing or development without a live PostgreSQL instance.
 type MemoryRepository struct {
 	mu   sync.RWMutex
@@ -329,6 +370,32 @@ func (m *MemoryRepository) UpdateStatusRetry(ctx context.Context, id string, err
 	job.Status = models.StatusQueued
 	job.Error = &errStr
 	return nil
+}
+
+func (m *MemoryRepository) EnqueueDueScheduledJobs(ctx context.Context, until time.Time, limit int) ([]*models.Job, error) {
+	m.mu.Lock()
+	defer m.mu.Unlock()
+
+	var dueJobs []*models.Job
+	for _, job := range m.jobs {
+		if job.Status == models.StatusScheduled && job.ScheduledAt != nil && !job.ScheduledAt.After(until) {
+			dueJobs = append(dueJobs, job)
+		}
+	}
+
+	sort.Slice(dueJobs, func(i, j int) bool {
+		return dueJobs[i].ScheduledAt.Before(*dueJobs[j].ScheduledAt)
+	})
+
+	if len(dueJobs) > limit {
+		dueJobs = dueJobs[:limit]
+	}
+
+	for _, job := range dueJobs {
+		job.Status = models.StatusQueued
+	}
+
+	return dueJobs, nil
 }
 
 // SeedMockData populates initial mock jobs into the MemoryRepository for rich initial data
