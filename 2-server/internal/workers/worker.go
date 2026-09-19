@@ -117,7 +117,15 @@ func (w *Worker) processJobPayload(ctx context.Context, payload *jobs.QueuePaylo
 	timeoutCtx, cancel := context.WithTimeout(ctx, w.jobTimeout)
 	defer cancel()
 
-	procErr := w.processor.Process(timeoutCtx, job, w.id)
+	procErr := func() (err error) {
+		defer func() {
+			if r := recover(); r != nil {
+				err = fmt.Errorf("panic during job execution: %v", r)
+				logger.Error("Job processing panicked", "worker_id", w.id, "job_id", job.ID, "panic", r)
+			}
+		}()
+		return w.processor.Process(timeoutCtx, job, w.id)
+	}()
 
 	// If context was cancelled due to timeout, ensure procErr reflects that
 	if timeoutCtx.Err() == context.DeadlineExceeded {

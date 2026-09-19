@@ -79,6 +79,7 @@ func (s *JobService) CreateJob(ctx context.Context, req models.CreateJobRequest)
 	if s.queue != nil && job.Status == models.StatusQueued {
 		if err := s.queue.Enqueue(ctx, job); err != nil {
 			logger.Error("Failed to enqueue job into Redis queue", "job_id", job.ID, "error", err)
+			s.repo.UpdateStatusFailed(ctx, job.ID, time.Now().UTC(), "Failed to enqueue to queue broker: " + err.Error())
 			return nil, fmt.Errorf("job persisted to database but failed to enqueue into queue broker")
 		}
 	}
