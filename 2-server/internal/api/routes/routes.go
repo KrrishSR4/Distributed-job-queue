@@ -28,6 +28,7 @@ func SetupRouter(allowedOrigin string, healthHandler *handlers.HealthHandler, jo
 			r.Post("/", jobHandler.CreateJob)
 			r.Get("/{id}", jobHandler.GetJob)
 			r.Delete("/{id}", jobHandler.DeleteJob)
+			r.Post("/{id}/cancel", jobHandler.CancelJob)
 		})
 	})
 

@@ -109,3 +109,34 @@ func (h *JobHandler) DeleteJob(w http.ResponseWriter, r *http.Request) {
 		"id":      id,
 	})
 }
+
+func (h *JobHandler) CancelJob(w http.ResponseWriter, r *http.Request) {
+	id := chi.URLParam(r, "id")
+	if id == "" {
+		response.ValidationError(w, "Job ID is required")
+		return
+	}
+
+	err := h.service.CancelJob(r.Context(), id)
+	if err != nil {
+		if errors.Is(err, jobs.ErrJobNotFound) {
+			response.NotFound(w, "Job with specified ID not found")
+			return
+		}
+		if errors.Is(err, jobs.ErrInvalidID) {
+			response.ValidationError(w, "Invalid job ID format")
+			return
+		}
+		if errors.Is(err, jobs.ErrJobNotCancellable) {
+			response.ValidationError(w, "Job cannot be cancelled in its current state")
+			return
+		}
+		response.InternalError(w, "Failed to cancel job: "+err.Error())
+		return
+	}
+
+	response.JSON(w, http.StatusOK, map[string]string{
+		"message": "Job cancelled successfully",
+		"id":      id,
+	})
+}

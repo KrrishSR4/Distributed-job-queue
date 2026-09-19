@@ -15,6 +15,7 @@ const (
 	StatusProcessing JobStatus = "processing"
 	StatusCompleted  JobStatus = "completed"
 	StatusFailed     JobStatus = "failed"
+	StatusCancelled  JobStatus = "cancelled"
 
 	PriorityLow      JobPriority = "low"
 	PriorityMedium   JobPriority = "medium"

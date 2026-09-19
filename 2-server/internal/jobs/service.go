@@ -14,9 +14,11 @@ import (
 )
 
 var (
-	ErrJobNotFound   = errors.New("job not found")
-	ErrInvalidID     = errors.New("invalid job id format")
-	ErrInvalidFilter = errors.New("invalid query filter parameters")
+	ErrJobNotFound       = errors.New("job not found")
+	ErrInvalidID         = errors.New("invalid job id format")
+	ErrInvalidFilter     = errors.New("invalid query filter parameters")
+	ErrJobNotQueued      = errors.New("job is not in a queued state")
+	ErrJobNotCancellable = errors.New("job cannot be cancelled in its current state")
 )
 
 type Service interface {
@@ -24,6 +26,7 @@ type Service interface {
 	GetJobByID(ctx context.Context, id string) (*models.Job, error)
 	ListJobs(ctx context.Context, filter models.JobListFilter) (*models.PaginatedJobsResponse, error)
 	DeleteJob(ctx context.Context, id string) error
+	CancelJob(ctx context.Context, id string) error
 }
 
 type JobService struct {
@@ -137,5 +140,18 @@ func (s *JobService) DeleteJob(ctx context.Context, id string) error {
 		}
 		return err
 	}
+	return nil
+}
+
+func (s *JobService) CancelJob(ctx context.Context, id string) error {
+	if id == "" {
+		return ErrInvalidID
+	}
+
+	err := s.repo.Cancel(ctx, id)
+	if err != nil {
+		return err
+	}
+
 	return nil
 }

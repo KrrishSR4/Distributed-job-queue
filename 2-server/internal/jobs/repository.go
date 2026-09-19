@@ -19,6 +19,7 @@ type Repository interface {
 	GetByID(ctx context.Context, id string) (*models.Job, error)
 	List(ctx context.Context, filter models.JobListFilter) ([]*models.Job, int, error)
 	Delete(ctx context.Context, id string) error
+	Cancel(ctx context.Context, id string) error
 	UpdateStatusProcessing(ctx context.Context, id string, workerID string, startedAt time.Time) error
 	UpdateStatusCompleted(ctx context.Context, id string, completedAt time.Time) error
 	UpdateStatusFailed(ctx context.Context, id string, failedAt time.Time, errStr string) error
@@ -153,15 +154,35 @@ func (r *PostgresRepository) Delete(ctx context.Context, id string) error {
 	return nil
 }
 
+func (r *PostgresRepository) Cancel(ctx context.Context, id string) error {
+	query := `
+		UPDATE jobs
+		SET status = $2, error = $3
+		WHERE id = $1 AND status IN ($4, $5)
+	`
+	cmd, err := r.pool.Exec(ctx, query, id, models.StatusCancelled, "Job was cancelled", models.StatusQueued, models.StatusScheduled)
+	if err != nil {
+		return fmt.Errorf("failed to cancel job: %w", err)
+	}
+
+	if cmd.RowsAffected() == 0 {
+		return ErrJobNotCancellable
+	}
+	return nil
+}
+
 func (r *PostgresRepository) UpdateStatusProcessing(ctx context.Context, id string, workerID string, startedAt time.Time) error {
 	query := `
 		UPDATE jobs
 		SET status = $2, worker_id = $3, started_at = $4, attempts = attempts + 1
-		WHERE id = $1
+		WHERE id = $1 AND status = $5
 	`
-	_, err := r.pool.Exec(ctx, query, id, models.StatusProcessing, workerID, startedAt)
+	cmd, err := r.pool.Exec(ctx, query, id, models.StatusProcessing, workerID, startedAt, models.StatusQueued)
 	if err != nil {
 		return fmt.Errorf("failed to update job status to processing: %w", err)
+	}
+	if cmd.RowsAffected() == 0 {
+		return ErrJobNotQueued
 	}
 	return nil
 }
@@ -321,12 +342,31 @@ func (m *MemoryRepository) Delete(ctx context.Context, id string) error {
 	return nil
 }
 
+func (m *MemoryRepository) Cancel(ctx context.Context, id string) error {
+	m.mu.Lock()
+	defer m.mu.Unlock()
+	job, exists := m.jobs[id]
+	if !exists {
+		return ErrJobNotFound
+	}
+	if job.Status != models.StatusQueued && job.Status != models.StatusScheduled {
+		return ErrJobNotCancellable
+	}
+	job.Status = models.StatusCancelled
+	errStr := "Job was cancelled"
+	job.Error = &errStr
+	return nil
+}
+
 func (m *MemoryRepository) UpdateStatusProcessing(ctx context.Context, id string, workerID string, startedAt time.Time) error {
 	m.mu.Lock()
 	defer m.mu.Unlock()
 	job, exists := m.jobs[id]
 	if !exists {
 		return pgx.ErrNoRows
+	}
+	if job.Status != models.StatusQueued {
+		return ErrJobNotQueued
 	}
 	job.Attempts++
 	job.Status = models.StatusProcessing

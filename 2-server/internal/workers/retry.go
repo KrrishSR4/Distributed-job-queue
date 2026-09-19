@@ -93,6 +93,13 @@ func (rm *RetryManager) ScheduleRetry(ctx context.Context, job *models.Job, errS
 		enqueueCtx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
 		defer cancel()
 
+		// Fetch the latest state of the job to ensure it hasn't been cancelled
+		latestJob, err := rm.repo.GetByID(enqueueCtx, job.ID)
+		if err == nil && latestJob != nil && latestJob.Status == models.StatusCancelled {
+			fmt.Printf("[RetryManager] job %s was cancelled before retry execution, skipping enqueue\n", job.ID)
+			return
+		}
+
 		if err := rm.queue.Enqueue(enqueueCtx, job); err != nil {
 			// If we fail to enqueue, it's stuck in DB as 'queued' but not in Redis.
 			// In a robust system, a periodic "sweeper" would find 'queued' jobs older than X

@@ -2,6 +2,7 @@ package workers
 
 import (
 	"context"
+	"errors"
 	"time"
 
 	"github.com/KrrishSR4/Distributed-job-queue/server/internal/jobs"
@@ -76,8 +77,17 @@ func (w *Worker) processJobPayload(ctx context.Context, payload *jobs.QueuePaylo
 		return
 	}
 
+	if job.Status == models.StatusCancelled {
+		logger.Info("Cancelled job skipped by worker", "worker_id", w.id, "job_id", payload.JobID)
+		return
+	}
+
 	startedAt := time.Now().UTC()
 	if err := w.repo.UpdateStatusProcessing(ctx, job.ID, w.id, startedAt); err != nil {
+		if errors.Is(err, jobs.ErrJobNotQueued) {
+			logger.Info("Job no longer queued (possibly cancelled), skipping", "worker_id", w.id, "job_id", job.ID)
+			return
+		}
 		logger.Error("Failed to update job status to processing", "worker_id", w.id, "job_id", job.ID, "error", err)
 		return
 	}
@@ -92,7 +102,7 @@ func (w *Worker) processJobPayload(ctx context.Context, payload *jobs.QueuePaylo
 	if procErr != nil {
 		failedAt := time.Now().UTC()
 		errStr := procErr.Error()
-		
+
 		if job.Attempts < job.MaxAttempts {
 			logger.Warn("Job processing failed, scheduling retry",
 				"worker_id", w.id,
