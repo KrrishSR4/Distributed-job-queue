@@ -33,8 +33,12 @@ export class WebsocketService {
 
     this.ws.onmessage = (event) => {
       try {
-        const data = JSON.parse(event.data);
-        this.events$.next(data);
+        const lines = event.data.split('\n');
+        for (const line of lines) {
+          if (!line.trim()) continue;
+          const data = JSON.parse(line);
+          this.events$.next(data);
+        }
       } catch (e) {
         console.error('[WebSocket] Error parsing message', e);
       }

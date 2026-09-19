@@ -57,7 +57,7 @@ func (h *Hub) Run(ctx context.Context) {
 			}
 			h.mu.Unlock()
 		case message := <-h.broadcast:
-			h.mu.RLock()
+			h.mu.Lock()
 			for client := range h.clients {
 				select {
 				case client.send <- message:
@@ -68,7 +68,7 @@ func (h *Hub) Run(ctx context.Context) {
 					logger.Warn("WebSocket client too slow, disconnected")
 				}
 			}
-			h.mu.RUnlock()
+			h.mu.Unlock()
 		}
 	}
 }
