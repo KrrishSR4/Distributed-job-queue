@@ -5,13 +5,13 @@ import { Subject } from 'rxjs';
   providedIn: 'root'
 })
 export class WebsocketService {
-  private ws = null;
-  private reconnectAttempts = 0;
-  private maxReconnectAttempts = 5;
-  private url = 'ws://localhost:8080/ws';
+  ws = null;
+  reconnectAttempts = 0;
+  maxReconnectAttempts = 5;
+  url = 'ws://localhost:8080/ws';
   
-  public events$ = new Subject();
-  public connectionStatus$ = new Subject(); // 'connected', 'connecting', 'disconnected'
+  events$ = new Subject();
+  connectionStatus$ = new Subject(); // 'connected', 'connecting', 'disconnected'
 
   constructor() {
     this.connect();
@@ -56,7 +56,7 @@ export class WebsocketService {
     };
   }
 
-  private scheduleReconnect() {
+  scheduleReconnect() {
     if (this.reconnectAttempts >= this.maxReconnectAttempts) {
       console.log('[WebSocket] Max reconnect attempts reached');
       return;
