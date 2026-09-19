@@ -7,36 +7,52 @@ import (
 	"time"
 
 	"github.com/KrrishSR4/Distributed-job-queue/server/internal/jobs"
+	"github.com/KrrishSR4/Distributed-job-queue/server/internal/api/websocket"
 	"github.com/KrrishSR4/Distributed-job-queue/server/pkg/logger"
 )
 
 type WorkerPool struct {
 	workerCount int
-	queue       jobs.Queue
 	repo        jobs.Repository
+	queue       jobs.Queue
 	processor   JobProcessor
+	retryMgr    *RetryManager
+	jobTimeout  time.Duration
 	workers     []*Worker
-	wg          sync.WaitGroup
 	ctx         context.Context
 	cancel      context.CancelFunc
+	wg          sync.WaitGroup
+	pub         websocket.EventPublisher
 }
 
-func NewWorkerPool(workerCount int, repo jobs.Repository, queue jobs.Queue, processor JobProcessor, baseDelay, maxDelay, jobTimeout time.Duration) *WorkerPool {
+func NewWorkerPool(
+	workerCount int,
+	repo jobs.Repository,
+	queue jobs.Queue,
+	processor JobProcessor,
+	retryBaseDelay time.Duration,
+	retryMaxDelay time.Duration,
+	jobTimeout time.Duration,
+	pub websocket.EventPublisher,
+) *WorkerPool {
 	if workerCount <= 0 {
 		workerCount = 3
 	}
-	if baseDelay <= 0 {
-		baseDelay = 1 * time.Second
+	if retryBaseDelay <= 0 {
+		retryBaseDelay = 1 * time.Second
 	}
-	if maxDelay <= 0 {
-		maxDelay = 30 * time.Second
+	if retryMaxDelay <= 0 {
+		retryMaxDelay = 30 * time.Second
 	}
 	if jobTimeout <= 0 {
 		jobTimeout = 30 * time.Second
 	}
+	if pub == nil {
+		pub = &websocket.NoopEventPublisher{}
+	}
 
 	ctx, cancel := context.WithCancel(context.Background())
-	retryMgr := NewRetryManager(baseDelay, maxDelay, queue, repo)
+	retryMgr := NewRetryManager(retryBaseDelay, retryMaxDelay, queue, repo, pub)
 
 	pool := &WorkerPool{
 		workerCount: workerCount,
@@ -50,7 +66,7 @@ func NewWorkerPool(workerCount int, repo jobs.Repository, queue jobs.Queue, proc
 
 	for i := 1; i <= workerCount; i++ {
 		workerID := fmt.Sprintf("worker-%d", i)
-		worker := NewWorker(workerID, queue, repo, processor, retryMgr, jobTimeout)
+		worker := NewWorker(workerID, queue, repo, processor, retryMgr, jobTimeout, pub)
 		pool.workers = append(pool.workers, worker)
 	}
 

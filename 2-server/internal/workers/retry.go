@@ -2,11 +2,11 @@ package workers
 
 import (
 	"context"
-	"fmt"
 	"math"
 	"math/rand"
 	"time"
 
+	"github.com/KrrishSR4/Distributed-job-queue/server/internal/api/websocket"
 	"github.com/KrrishSR4/Distributed-job-queue/server/internal/jobs"
 	"github.com/KrrishSR4/Distributed-job-queue/server/internal/models"
 	"github.com/KrrishSR4/Distributed-job-queue/server/pkg/logger"
@@ -52,9 +52,13 @@ type RetryManager struct {
 	policy *RetryPolicy
 	queue  jobs.Queue
 	repo   jobs.Repository
+	pub    websocket.EventPublisher
 }
 
-func NewRetryManager(baseDelay, maxDelay time.Duration, queue jobs.Queue, repo jobs.Repository) *RetryManager {
+func NewRetryManager(baseDelay, maxDelay time.Duration, queue jobs.Queue, repo jobs.Repository, pub websocket.EventPublisher) *RetryManager {
+	if pub == nil {
+		pub = &websocket.NoopEventPublisher{}
+	}
 	return &RetryManager{
 		policy: &RetryPolicy{
 			BaseDelay: baseDelay,
@@ -62,6 +66,7 @@ func NewRetryManager(baseDelay, maxDelay time.Duration, queue jobs.Queue, repo j
 		},
 		queue: queue,
 		repo:  repo,
+		pub:   pub,
 	}
 }
 
@@ -74,8 +79,18 @@ func (rm *RetryManager) ScheduleRetry(ctx context.Context, job *models.Job, errS
 
 	// Update PostgreSQL state: set back to scheduled, save the error and next execution time
 	if err := rm.repo.UpdateStatusRetry(ctx, job.ID, errStr, nextRunAt); err != nil {
-		return fmt.Errorf("failed to update repository to retry state: %w", err)
+		logger.Error("Failed to update job status to scheduled for retry", "job_id", job.ID, "error", err)
+		return err
 	}
+
+	rm.pub.Publish(websocket.Event{
+		Type:      websocket.EventJobRetrying,
+		JobID:     job.ID,
+		Timestamp: time.Now().UTC(),
+		Data: map[string]string{
+			"status": string(models.StatusScheduled),
+		},
+	})
 
 	logger.Info("Job scheduled for retry", "job_id", job.ID, "delay", delay, "next_run_at", nextRunAt)
 

@@ -48,13 +48,13 @@ func TestJobTimeout(t *testing.T) {
 	}
 	_ = queue.Enqueue(context.Background(), job)
 
-	retryMgr := NewRetryManager(1*time.Millisecond, 2*time.Millisecond, queue, repo)
+	retryMgr := NewRetryManager(1*time.Millisecond, 2*time.Millisecond, queue, repo, nil)
 
 	// Processor that takes 100ms
 	processor := &mockProcessor{delay: 100 * time.Millisecond}
 
 	// Worker with 50ms timeout (should time out)
-	worker := NewWorker("worker-1", queue, repo, processor, retryMgr, 50*time.Millisecond)
+	worker := NewWorker("worker-1", queue, repo, processor, retryMgr, 50*time.Millisecond, nil)
 
 	// Run processJobPayload directly
 	worker.processJobPayload(context.Background(), payload)
@@ -100,7 +100,7 @@ func TestStaleJobRecovery(t *testing.T) {
 	}
 	_ = repo.Create(ctx, freshJob)
 
-	scheduler := NewScheduler(repo, queue, 10*time.Second, 10*time.Second, 1*time.Minute, 50)
+	scheduler := NewScheduler(repo, queue, 10*time.Second, 10*time.Second, 1*time.Minute, 50, nil)
 
 	// Manually trigger recovery
 	scheduler.recoverStaleJobs(ctx)
@@ -142,9 +142,9 @@ func TestJobTimeoutExhaustsMaxAttempts(t *testing.T) {
 		Priority: models.PriorityMedium,
 	}
 
-	retryMgr := NewRetryManager(1*time.Millisecond, 2*time.Millisecond, queue, repo)
+	retryMgr := NewRetryManager(1*time.Millisecond, 2*time.Millisecond, queue, repo, nil)
 	processor := &mockProcessor{delay: 100 * time.Millisecond}
-	worker := NewWorker("worker-1", queue, repo, processor, retryMgr, 50*time.Millisecond)
+	worker := NewWorker("worker-1", queue, repo, processor, retryMgr, 50*time.Millisecond, nil)
 
 	// Run processJobPayload. Attempt 2 -> 3 (max). Should go to DLQ.
 	worker.processJobPayload(context.Background(), payload)

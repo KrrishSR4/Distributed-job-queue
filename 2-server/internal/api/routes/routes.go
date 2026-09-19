@@ -5,11 +5,12 @@ import (
 
 	"github.com/KrrishSR4/Distributed-job-queue/server/internal/api/handlers"
 	appMiddleware "github.com/KrrishSR4/Distributed-job-queue/server/internal/api/middleware"
+	"github.com/KrrishSR4/Distributed-job-queue/server/internal/api/websocket"
 	"github.com/KrrishSR4/Distributed-job-queue/server/pkg/response"
 	"github.com/go-chi/chi/v5"
 )
 
-func SetupRouter(allowedOrigin string, healthHandler *handlers.HealthHandler, jobHandler *handlers.JobHandler) http.Handler {
+func SetupRouter(allowedOrigin string, healthHandler *handlers.HealthHandler, jobHandler *handlers.JobHandler, wsHub *websocket.Hub) http.Handler {
 	r := chi.NewRouter()
 
 	// Middlewares
@@ -20,6 +21,11 @@ func SetupRouter(allowedOrigin string, healthHandler *handlers.HealthHandler, jo
 
 	// Health Check
 	r.Get("/health", healthHandler.HealthCheck)
+
+	// WebSocket Endpoint
+	if wsHub != nil {
+		r.Get("/ws", wsHub.ServeWs)
+	}
 
 	// API V1 Routes
 	r.Route("/api/v1", func(r chi.Router) {

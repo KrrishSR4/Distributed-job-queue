@@ -7,6 +7,7 @@ import (
 	"math"
 	"time"
 
+	"github.com/KrrishSR4/Distributed-job-queue/server/internal/api/websocket"
 	"github.com/KrrishSR4/Distributed-job-queue/server/internal/models"
 	"github.com/KrrishSR4/Distributed-job-queue/server/pkg/logger"
 	"github.com/google/uuid"
@@ -32,12 +33,17 @@ type Service interface {
 type JobService struct {
 	repo  Repository
 	queue Queue
+	pub   websocket.EventPublisher
 }
 
-func NewJobService(repo Repository, queue Queue) *JobService {
+func NewJobService(repo Repository, queue Queue, pub websocket.EventPublisher) *JobService {
+	if pub == nil {
+		pub = &websocket.NoopEventPublisher{}
+	}
 	return &JobService{
 		repo:  repo,
 		queue: queue,
+		pub:   pub,
 	}
 }
 
@@ -76,6 +82,19 @@ func (s *JobService) CreateJob(ctx context.Context, req models.CreateJobRequest)
 			return nil, fmt.Errorf("job persisted to database but failed to enqueue into queue broker")
 		}
 	}
+
+	eventType := websocket.EventJobQueued
+	if job.Status == models.StatusScheduled {
+		eventType = websocket.EventJobScheduled
+	}
+	s.pub.Publish(websocket.Event{
+		Type:      eventType,
+		JobID:     job.ID,
+		Timestamp: time.Now().UTC(),
+		Data: map[string]string{
+			"status": string(job.Status),
+		},
+	})
 
 	return job, nil
 }
@@ -152,6 +171,15 @@ func (s *JobService) CancelJob(ctx context.Context, id string) error {
 	if err != nil {
 		return err
 	}
+
+	s.pub.Publish(websocket.Event{
+		Type:      websocket.EventJobCancelled,
+		JobID:     id,
+		Timestamp: time.Now().UTC(),
+		Data: map[string]string{
+			"status": string(models.StatusCancelled),
+		},
+	})
 
 	return nil
 }

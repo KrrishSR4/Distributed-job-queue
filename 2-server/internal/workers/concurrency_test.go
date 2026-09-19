@@ -50,7 +50,7 @@ func TestWorkerConcurrencyLimit(t *testing.T) {
 	}
 	
 	workerCount := 3
-	pool := NewWorkerPool(workerCount, repo, queue, processor, 1*time.Millisecond, 2*time.Millisecond, 30*time.Second)
+	pool := NewWorkerPool(workerCount, repo, queue, processor, 10*time.Millisecond, 20*time.Millisecond, 50*time.Millisecond, nil)
 	
 	pool.Start()
 	

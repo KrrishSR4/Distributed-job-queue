@@ -23,7 +23,7 @@ func TestWorkerPoolStartup(t *testing.T) {
 	queue := jobs.NewMemoryQueue()
 	processor := NewDemoProcessor(0)
 
-	pool := NewWorkerPool(5, repo, queue, processor, 1*time.Millisecond, 2*time.Millisecond, 30*time.Second)
+	pool := NewWorkerPool(5, repo, queue, processor, 1*time.Millisecond, 2*time.Millisecond, 30*time.Second, nil)
 	if pool.WorkerCount() != 5 {
 		t.Fatalf("expected 5 workers, got %d", pool.WorkerCount())
 	}
@@ -56,7 +56,7 @@ func TestWorkerJobLifecycleSuccess(t *testing.T) {
 		t.Fatalf("failed to enqueue job: %v", err)
 	}
 
-	pool := NewWorkerPool(2, repo, queue, processor, 1*time.Millisecond, 2*time.Millisecond, 30*time.Second)
+	pool := NewWorkerPool(2, repo, queue, processor, 1*time.Millisecond, 2*time.Millisecond, 30*time.Second, nil)
 	pool.Start()
 
 	// Give worker time to consume and complete job
@@ -109,7 +109,7 @@ func TestWorkerJobLifecycleFailure(t *testing.T) {
 		t.Fatalf("failed to enqueue job: %v", err)
 	}
 
-	pool := NewWorkerPool(1, repo, queue, failingProcessor, 1*time.Millisecond, 2*time.Millisecond, 30*time.Second)
+	pool := NewWorkerPool(1, repo, queue, failingProcessor, 1*time.Millisecond, 2*time.Millisecond, 30*time.Second, nil)
 	pool.Start()
 
 	time.Sleep(100 * time.Millisecond)
@@ -178,7 +178,7 @@ func TestWorkerPoolConcurrency(t *testing.T) {
 	}
 
 	// 3 workers
-	pool := NewWorkerPool(3, repo, queue, proc, 1*time.Millisecond, 2*time.Millisecond, 30*time.Second)
+	pool := NewWorkerPool(3, repo, queue, proc, 1*time.Millisecond, 2*time.Millisecond, 30*time.Second, nil)
 	pool.Start()
 
 	time.Sleep(250 * time.Millisecond)
@@ -195,7 +195,7 @@ func TestWorkerPoolGracefulShutdown(t *testing.T) {
 	queue := jobs.NewMemoryQueue()
 	processor := NewDemoProcessor(100 * time.Millisecond)
 
-	pool := NewWorkerPool(3, repo, queue, processor, 1*time.Millisecond, 2*time.Millisecond, 30*time.Second)
+	pool := NewWorkerPool(3, repo, queue, processor, 1*time.Millisecond, 2*time.Millisecond, 30*time.Second, nil)
 	pool.Start()
 
 	doneCh := make(chan struct{})
@@ -224,7 +224,7 @@ func TestWorkerMalformedPayload(t *testing.T) {
 		ID: "",
 	})
 
-	pool := NewWorkerPool(1, repo, queue, processor, 1*time.Millisecond, 2*time.Millisecond, 30*time.Second)
+	pool := NewWorkerPool(1, repo, queue, processor, 1*time.Millisecond, 2*time.Millisecond, 30*time.Second, nil)
 	pool.Start()
 
 	time.Sleep(50 * time.Millisecond)

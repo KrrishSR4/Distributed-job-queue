@@ -64,7 +64,7 @@ func TestDLQ_JobSuccess_NoDLQEntry(t *testing.T) {
 	_ = repo.Create(ctx, job)
 	_ = queue.Enqueue(ctx, job)
 
-	pool := NewWorkerPool(1, repo, queue, processor, 1*time.Millisecond, 2*time.Millisecond, 30*time.Second)
+	pool := NewWorkerPool(1, repo, queue, processor, 1*time.Millisecond, 2*time.Millisecond, 30*time.Second, nil)
 	pool.Start()
 
 	time.Sleep(100 * time.Millisecond)
@@ -104,8 +104,8 @@ func TestDLQ_JobFails_WithRetriesRemaining_NoDLQEntry(t *testing.T) {
 	_ = queue.Enqueue(ctx, job)
 
 	// Create worker pool with 50ms retry base delay
-	retryMgr := NewRetryManager(50*time.Millisecond, 100*time.Millisecond, queue, repo)
-	worker := NewWorker("worker-retry-1", queue, repo, processor, retryMgr, 30*time.Second)
+	retryMgr := NewRetryManager(50*time.Millisecond, 100*time.Millisecond, queue, repo, nil)
+	worker := NewWorker("worker-retry-1", queue, repo, processor, retryMgr, 30*time.Second, nil)
 
 	workerCtx, cancel := context.WithCancel(ctx)
 	go worker.Start(workerCtx)
@@ -148,11 +148,11 @@ func TestDLQ_JobReachesMaxAttempts_MovesToDLQ(t *testing.T) {
 	_ = repo.Create(ctx, job)
 	_ = queue.Enqueue(ctx, job)
 
-	scheduler := NewScheduler(repo, queue, 10*time.Millisecond, 10*time.Second, 1*time.Minute, 10)
+	scheduler := NewScheduler(repo, queue, 10*time.Millisecond, 10*time.Second, 1*time.Minute, 10, nil)
 	schedCtx, schedCancel := context.WithCancel(ctx)
 	go scheduler.Start(schedCtx)
 
-	pool := NewWorkerPool(1, repo, queue, processor, 10*time.Millisecond, 20*time.Millisecond, 30*time.Second)
+	pool := NewWorkerPool(1, repo, queue, processor, 10*time.Millisecond, 20*time.Millisecond, 30*time.Second, nil)
 	pool.Start()
 
 	// Wait for attempt 1 (fails) + attempt 2 (fails, max reached -> DLQ)
@@ -227,8 +227,8 @@ func TestDLQ_EnqueueFailureHandledGracefully(t *testing.T) {
 	_ = repo.Create(ctx, job)
 	_ = memQueue.Enqueue(ctx, job)
 
-	retryMgr := NewRetryManager(10*time.Millisecond, 20*time.Millisecond, errQ, repo)
-	worker := NewWorker("worker-dlq-err", errQ, repo, processor, retryMgr, 30*time.Second)
+	retryMgr := NewRetryManager(10*time.Millisecond, 20*time.Millisecond, errQ, repo, nil)
+	worker := NewWorker("worker-dlq-err", errQ, repo, processor, retryMgr, 30*time.Second, nil)
 
 	workerCtx, cancel := context.WithCancel(ctx)
 	go worker.Start(workerCtx)
@@ -264,12 +264,12 @@ func TestDLQ_ConcurrentWorkersDeadLettering(t *testing.T) {
 		_ = queue.Enqueue(ctx, job)
 	}
 
-	scheduler := NewScheduler(repo, queue, 10*time.Millisecond, 10*time.Second, 1*time.Minute, 10)
+	scheduler := NewScheduler(repo, queue, 10*time.Millisecond, 10*time.Second, 1*time.Minute, 10, nil)
 	schedCtx, schedCancel := context.WithCancel(ctx)
 	go scheduler.Start(schedCtx)
 
 	// 4 workers processing 10 failing jobs concurrently
-	pool := NewWorkerPool(4, repo, queue, processor, 10*time.Millisecond, 20*time.Millisecond, 30*time.Second)
+	pool := NewWorkerPool(4, repo, queue, processor, 10*time.Millisecond, 20*time.Millisecond, 30*time.Second, nil)
 	pool.Start()
 
 	time.Sleep(300 * time.Millisecond)

@@ -12,6 +12,7 @@ import (
 
 	"github.com/KrrishSR4/Distributed-job-queue/server/internal/api/handlers"
 	"github.com/KrrishSR4/Distributed-job-queue/server/internal/api/routes"
+	"github.com/KrrishSR4/Distributed-job-queue/server/internal/api/websocket"
 	"github.com/KrrishSR4/Distributed-job-queue/server/internal/config"
 	"github.com/KrrishSR4/Distributed-job-queue/server/internal/database"
 	"github.com/KrrishSR4/Distributed-job-queue/server/internal/jobs"
@@ -61,21 +62,24 @@ func main() {
 		queue = jobs.NewMemoryQueue()
 	}
 
-	jobService := jobs.NewJobService(repo, queue)
+	wsHub := websocket.NewHub()
+	go wsHub.Run(ctx)
+
+	jobService := jobs.NewJobService(repo, queue, wsHub)
 
 	// Initialize and start Worker Pool
 	processor := workers.NewDemoProcessor(200 * time.Millisecond)
-	workerPool := workers.NewWorkerPool(cfg.WorkerCount, repo, queue, processor, cfg.RetryBaseDelay, cfg.RetryMaxDelay, cfg.JobTimeout)
+	workerPool := workers.NewWorkerPool(cfg.WorkerCount, repo, queue, processor, cfg.RetryBaseDelay, cfg.RetryMaxDelay, cfg.JobTimeout, wsHub)
 	workerPool.Start()
 
 	// Initialize and start Scheduler
-	scheduler := workers.NewScheduler(repo, queue, 5*time.Second, cfg.JobRecoveryInterval, cfg.JobStaleTimeout, 50)
+	scheduler := workers.NewScheduler(repo, queue, 5*time.Second, cfg.JobRecoveryInterval, cfg.JobStaleTimeout, 50, wsHub)
 	go scheduler.Start(ctx)
 
 	healthHandler := handlers.NewHealthHandler(db, redisClient)
 	jobHandler := handlers.NewJobHandler(jobService)
 
-	router := routes.SetupRouter(cfg.AllowedOrigin, healthHandler, jobHandler)
+	router := routes.SetupRouter(cfg.AllowedOrigin, healthHandler, jobHandler, wsHub)
 
 	serverAddr := fmt.Sprintf(":%s", cfg.Port)
 	server := &http.Server{
@@ -110,6 +114,7 @@ func main() {
 		}
 
 		// Stop components gracefully
+		wsHub.Shutdown()
 		scheduler.Stop()
 		workerPool.Stop()
 

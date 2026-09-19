@@ -47,7 +47,7 @@ func TestScheduler_ProcessDueJobs(t *testing.T) {
 	}
 	_ = repo.Create(ctx, queuedJob)
 
-	scheduler := NewScheduler(repo, queue, 100*time.Millisecond, 10*time.Second, 60*time.Second, 10)
+	scheduler := NewScheduler(repo, queue, 100*time.Millisecond, 10*time.Second, 60*time.Second, 10, nil)
 
 	// Manually trigger processDueJobs
 	scheduler.processDueJobs(ctx)
@@ -82,7 +82,7 @@ func TestScheduler_GracefulShutdown(t *testing.T) {
 	queue := jobs.NewMemoryQueue()
 	ctx := context.Background()
 
-	scheduler := NewScheduler(repo, queue, 10*time.Millisecond, 10*time.Second, 60*time.Second, 10)
+	scheduler := NewScheduler(repo, queue, 10*time.Millisecond, 10*time.Second, 60*time.Second, 10, nil)
 
 	done := make(chan struct{})
 	go func() {

@@ -6,6 +6,7 @@ import (
 	"fmt"
 	"time"
 
+	"github.com/KrrishSR4/Distributed-job-queue/server/internal/api/websocket"
 	"github.com/KrrishSR4/Distributed-job-queue/server/internal/jobs"
 	"github.com/KrrishSR4/Distributed-job-queue/server/internal/models"
 	"github.com/KrrishSR4/Distributed-job-queue/server/pkg/logger"
@@ -18,9 +19,13 @@ type Worker struct {
 	processor  JobProcessor
 	retryMgr   *RetryManager
 	jobTimeout time.Duration
+	pub        websocket.EventPublisher
 }
 
-func NewWorker(id string, queue jobs.Queue, repo jobs.Repository, processor JobProcessor, retryMgr *RetryManager, jobTimeout time.Duration) *Worker {
+func NewWorker(id string, queue jobs.Queue, repo jobs.Repository, processor JobProcessor, retryMgr *RetryManager, jobTimeout time.Duration, pub websocket.EventPublisher) *Worker {
+	if pub == nil {
+		pub = &websocket.NoopEventPublisher{}
+	}
 	return &Worker{
 		id:         id,
 		queue:      queue,
@@ -28,6 +33,7 @@ func NewWorker(id string, queue jobs.Queue, repo jobs.Repository, processor JobP
 		processor:  processor,
 		retryMgr:   retryMgr,
 		jobTimeout: jobTimeout,
+		pub:        pub,
 	}
 }
 
@@ -97,6 +103,15 @@ func (w *Worker) processJobPayload(ctx context.Context, payload *jobs.QueuePaylo
 	job.WorkerID = &w.id
 	job.StartedAt = &startedAt
 
+	w.pub.Publish(websocket.Event{
+		Type:      websocket.EventJobProcessing,
+		JobID:     job.ID,
+		Timestamp: time.Now().UTC(),
+		Data: map[string]string{
+			"status": string(models.StatusProcessing),
+		},
+	})
+
 	logger.Info("Job processing started", "worker_id", w.id, "job_id", job.ID, "job_type", job.Type)
 
 	timeoutCtx, cancel := context.WithTimeout(ctx, w.jobTimeout)
@@ -130,6 +145,17 @@ func (w *Worker) processJobPayload(ctx context.Context, payload *jobs.QueuePaylo
 			if err := w.repo.UpdateStatusFailed(ctx, job.ID, failedAt, errStr); err != nil {
 				logger.Error("Failed to update job status to failed", "worker_id", w.id, "job_id", job.ID, "error", err)
 			}
+			
+			w.pub.Publish(websocket.Event{
+				Type:      websocket.EventJobFailed,
+				JobID:     job.ID,
+				Timestamp: time.Now().UTC(),
+				Data: map[string]string{
+					"status": string(models.StatusFailed),
+					"error":  errStr,
+				},
+			})
+
 			logger.Error("Job failed (max attempts reached)",
 				"worker_id", w.id,
 				"job_id", job.ID,
@@ -165,6 +191,16 @@ func (w *Worker) processJobPayload(ctx context.Context, payload *jobs.QueuePaylo
 					"max_attempts", job.MaxAttempts,
 					"reason", errStr,
 				)
+
+				w.pub.Publish(websocket.Event{
+					Type:      websocket.EventJobDLQ,
+					JobID:     job.ID,
+					Timestamp: time.Now().UTC(),
+					Data: map[string]string{
+						"status": string(models.StatusFailed),
+						"error":  errStr,
+					},
+				})
 			}
 		}
 	} else {
@@ -178,5 +214,14 @@ func (w *Worker) processJobPayload(ctx context.Context, payload *jobs.QueuePaylo
 			"job_type", job.Type,
 			"duration", duration.String(),
 		)
+
+		w.pub.Publish(websocket.Event{
+			Type:      websocket.EventJobCompleted,
+			JobID:     job.ID,
+			Timestamp: time.Now().UTC(),
+			Data: map[string]string{
+				"status": string(models.StatusCompleted),
+			},
+		})
 	}
 }
