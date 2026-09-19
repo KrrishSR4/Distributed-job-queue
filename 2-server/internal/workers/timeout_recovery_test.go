@@ -59,11 +59,11 @@ func TestJobTimeout(t *testing.T) {
 	// Run processJobPayload directly
 	worker.processJobPayload(context.Background(), payload)
 
-	// The job should have been moved to StatusQueued by the retry manager (due to retry)
+	// The job should have been moved to StatusScheduled by the retry manager (due to retry)
 	updatedJob, _ := repo.GetByID(context.Background(), job.ID)
-
-	if updatedJob.Status != models.StatusQueued {
-		t.Errorf("Expected job to be retried (StatusQueued), got %s", updatedJob.Status)
+	
+	if updatedJob.Status != models.StatusScheduled {
+		t.Errorf("Expected job to be retried (StatusScheduled), got %s", updatedJob.Status)
 	}
 	if updatedJob.Attempts != 1 {
 		t.Errorf("Expected attempts to be 1, got %d", updatedJob.Attempts)

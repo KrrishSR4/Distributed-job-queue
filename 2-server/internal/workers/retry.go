@@ -9,6 +9,7 @@ import (
 
 	"github.com/KrrishSR4/Distributed-job-queue/server/internal/jobs"
 	"github.com/KrrishSR4/Distributed-job-queue/server/internal/models"
+	"github.com/KrrishSR4/Distributed-job-queue/server/pkg/logger"
 )
 
 // RetryPolicy calculates exponential backoff with jitter
@@ -64,51 +65,19 @@ func NewRetryManager(baseDelay, maxDelay time.Duration, queue jobs.Queue, repo j
 	}
 }
 
-// ScheduleRetry updates the job status to Retry (queued) and schedules it to be re-enqueued
-// after the calculated delay. This method is non-blocking.
+// ScheduleRetry updates the job status to Scheduled and sets the next run time
+// to the calculated delay. The background Scheduler will pick it up and re-enqueue it.
 func (rm *RetryManager) ScheduleRetry(ctx context.Context, job *models.Job, errStr string) error {
 	// Calculate delay based on the number of attempts already made
 	delay := rm.policy.CalculateDelay(job.Attempts)
+	nextRunAt := time.Now().UTC().Add(delay)
 
-	// Update PostgreSQL state: set back to queued, save the error
-	if err := rm.repo.UpdateStatusRetry(ctx, job.ID, errStr); err != nil {
+	// Update PostgreSQL state: set back to scheduled, save the error and next execution time
+	if err := rm.repo.UpdateStatusRetry(ctx, job.ID, errStr, nextRunAt); err != nil {
 		return fmt.Errorf("failed to update repository to retry state: %w", err)
 	}
 
-	// Schedule non-blocking requeue
-	go func() {
-		// Wait for the delay or context cancellation
-		select {
-		case <-time.After(delay):
-			// Proceed to enqueue
-		case <-ctx.Done():
-			// Server shutting down, we skip enqueue.
-			// The job remains in 'queued' state in DB, so it will be picked up on restart
-			// if we implement a startup job-recovery, or it just waits.
-			return
-		}
-
-		// Background context for enqueueing in case the original ctx was cancelled during sleep
-		// (though we handled that above, it's safer for the actual operation).
-		enqueueCtx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
-		defer cancel()
-
-		// Fetch the latest state of the job to ensure it hasn't been cancelled
-		latestJob, err := rm.repo.GetByID(enqueueCtx, job.ID)
-		if err == nil && latestJob != nil && latestJob.Status == models.StatusCancelled {
-			fmt.Printf("[RetryManager] job %s was cancelled before retry execution, skipping enqueue\n", job.ID)
-			return
-		}
-
-		if err := rm.queue.Enqueue(enqueueCtx, job); err != nil {
-			// If we fail to enqueue, it's stuck in DB as 'queued' but not in Redis.
-			// In a robust system, a periodic "sweeper" would find 'queued' jobs older than X
-			// and re-enqueue them. For now, we log the error.
-			fmt.Printf("[RetryManager] failed to re-enqueue job %s: %v\n", job.ID, err)
-		} else {
-			fmt.Printf("[RetryManager] successfully re-enqueued job %s after %v\n", job.ID, delay)
-		}
-	}()
+	logger.Info("Job scheduled for retry", "job_id", job.ID, "delay", delay, "next_run_at", nextRunAt)
 
 	return nil
 }
