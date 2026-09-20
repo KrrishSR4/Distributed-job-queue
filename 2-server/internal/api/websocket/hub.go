@@ -22,7 +22,7 @@ type Hub struct {
 
 	// Unregister requests from clients.
 	unregister chan *Client
-	
+
 	mu sync.RWMutex
 }
 

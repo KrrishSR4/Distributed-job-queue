@@ -43,17 +43,17 @@ func TestWorkerConcurrencyLimit(t *testing.T) {
 	repo := jobs.NewMemoryRepository()
 	queue := jobs.NewMemoryQueue()
 	ctx := context.Background()
-	
+
 	// Create processor that blocks jobs manually
 	processor := &concurrencyLimitTrackingProcessor{
 		waitBlock: make(chan struct{}),
 	}
-	
+
 	workerCount := 3
 	pool := NewWorkerPool(workerCount, "test-instance", repo, queue, processor, 10*time.Millisecond, 20*time.Millisecond, 50*time.Millisecond, nil)
-	
+
 	pool.Start()
-	
+
 	// Submit 20 jobs
 	totalJobs := 20
 	for i := 0; i < totalJobs; i++ {
@@ -81,19 +81,19 @@ func TestWorkerConcurrencyLimit(t *testing.T) {
 	if maxActive > int32(workerCount) {
 		t.Errorf("expected max active jobs <= %d, got %d", workerCount, maxActive)
 	}
-	
+
 	if currentActive != int32(workerCount) {
 		t.Errorf("expected exactly %d workers to be busy, got %d", workerCount, currentActive)
 	}
-	
+
 	// Unblock all workers
 	close(processor.waitBlock)
-	
+
 	// Let all jobs finish
 	time.Sleep(200 * time.Millisecond)
-	
+
 	pool.Stop()
-	
+
 	// Ensure everything processed
 	processor.mu.Lock()
 	finalActive := processor.activeJobs

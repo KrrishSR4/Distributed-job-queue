@@ -1,4 +1,4 @@
-# Phase 4.1: Horizontal Scaling
+# Horizontal Scaling
 
 ## Overview
 

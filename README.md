@@ -98,8 +98,22 @@ go run ./cmd/api
 
 - **Frontend (`1-client`)**: Angular (JavaScript), RxJS, Tailwind CSS v4, ECharts
 - **Backend (`2-server`)**: Go 1.22+, Chi Router, pgx (PostgreSQL), slog Structured Logging
-- **Data Layer**: PostgreSQL 16 (Relational Persistence), Redis 7 (Phase 3 Queue Broker)
+- **Data Layer**: PostgreSQL 16 (Relational Persistence), Redis 7 (Queue Broker)
 - **Infrastructure (`3-infrastructure`)**: Docker, Kubernetes, Prometheus, Grafana
+
+---
+
+## 🏗 System Design
+
+The Distributed Job Queue features a highly decoupled, scalable architecture designed for fault tolerance and high concurrency.
+
+- **Architecture**: A stateless Go API receives jobs and pushes them to Redis. A fleet of independent Go Workers processes the jobs.
+- **Source of Truth**: PostgreSQL serves as the persistent, authoritative state store, ensuring no jobs are lost.
+- **Idempotency**: Implemented via database unique constraints to protect against duplicate HTTP requests.
+- **Fault Tolerance**: Includes automatic stale-job recovery, exponential backoff retries, and a Dead Letter Queue (DLQ).
+- **Real-Time UI**: WebSockets stream status updates to the Angular Dashboard without polling.
+
+For full architectural diagrams, component data flows, and performance benchmarks, see the **[System Design Documentation](4-docs/system-design/overview.md)**.
 
 ---
 

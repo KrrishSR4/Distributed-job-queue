@@ -153,7 +153,7 @@ func (w *Worker) processJobPayload(ctx context.Context, payload *jobs.QueuePaylo
 			if err := w.repo.UpdateStatusFailed(ctx, job.ID, failedAt, errStr); err != nil {
 				logger.Error("Failed to update job status to failed", "worker_id", w.id, "job_id", job.ID, "error", err)
 			}
-			
+
 			w.pub.Publish(websocket.Event{
 				Type:      websocket.EventJobFailed,
 				JobID:     job.ID,

@@ -15,9 +15,9 @@ import (
 )
 
 var (
-	ErrJobNotFound       = errors.New("job not found")
-	ErrInvalidID         = errors.New("invalid job id format")
-	ErrInvalidFilter     = errors.New("invalid query filter parameters")
+	ErrJobNotFound             = errors.New("job not found")
+	ErrInvalidID               = errors.New("invalid job id format")
+	ErrInvalidFilter           = errors.New("invalid query filter parameters")
 	ErrJobNotQueued            = errors.New("job is not in a queued state")
 	ErrJobNotCancellable       = errors.New("job cannot be cancelled in its current state")
 	ErrDuplicateIdempotencyKey = errors.New("duplicate idempotency key")
@@ -93,7 +93,7 @@ func (s *JobService) CreateJob(ctx context.Context, req models.CreateJobRequest)
 	if s.queue != nil && job.Status == models.StatusQueued {
 		if err := s.queue.Enqueue(ctx, job); err != nil {
 			logger.Error("Failed to enqueue job into Redis queue", "job_id", job.ID, "error", err)
-			s.repo.UpdateStatusFailed(ctx, job.ID, time.Now().UTC(), "Failed to enqueue to queue broker: " + err.Error())
+			s.repo.UpdateStatusFailed(ctx, job.ID, time.Now().UTC(), "Failed to enqueue to queue broker: "+err.Error())
 			return nil, fmt.Errorf("job persisted to database but failed to enqueue into queue broker")
 		}
 	}

@@ -61,7 +61,7 @@ func TestJobTimeout(t *testing.T) {
 
 	// The job should have been moved to StatusScheduled by the retry manager (due to retry)
 	updatedJob, _ := repo.GetByID(context.Background(), job.ID)
-	
+
 	if updatedJob.Status != models.StatusScheduled {
 		t.Errorf("Expected job to be retried (StatusScheduled), got %s", updatedJob.Status)
 	}

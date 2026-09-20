@@ -1,4 +1,4 @@
-# Phase 4.4: Performance & Load Testing
+# Performance & Load Testing
 
 ## 1. Test Environment
 - **Hardware/OS**: Local Developer Machine (Windows)

@@ -6,8 +6,8 @@ import (
 	"sync"
 	"time"
 
-	"github.com/KrrishSR4/Distributed-job-queue/server/internal/jobs"
 	"github.com/KrrishSR4/Distributed-job-queue/server/internal/api/websocket"
+	"github.com/KrrishSR4/Distributed-job-queue/server/internal/jobs"
 	"github.com/KrrishSR4/Distributed-job-queue/server/pkg/logger"
 )
 

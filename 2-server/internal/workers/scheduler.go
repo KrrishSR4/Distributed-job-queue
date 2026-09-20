@@ -83,7 +83,7 @@ func (s *Scheduler) processDueJobs(ctx context.Context) {
 	for _, job := range dueJobs {
 		if err := s.queue.Enqueue(ctx, job); err != nil {
 			logger.Error("Scheduler failed to enqueue due job to Redis", "job_id", job.ID, "error", err)
-			s.repo.UpdateStatusFailed(ctx, job.ID, time.Now().UTC(), "Failed to enqueue due job to queue broker: " + err.Error())
+			s.repo.UpdateStatusFailed(ctx, job.ID, time.Now().UTC(), "Failed to enqueue due job to queue broker: "+err.Error())
 		} else {
 			logger.Info("Scheduler enqueued due job", "job_id", job.ID, "type", job.Type)
 
@@ -115,7 +115,7 @@ func (s *Scheduler) recoverStaleJobs(ctx context.Context) {
 	for _, job := range staleJobs {
 		if err := s.queue.Enqueue(ctx, job); err != nil {
 			logger.Error("Scheduler failed to re-enqueue recovered stale job", "job_id", job.ID, "error", err)
-			s.repo.UpdateStatusFailed(ctx, job.ID, time.Now().UTC(), "Failed to re-enqueue recovered stale job: " + err.Error())
+			s.repo.UpdateStatusFailed(ctx, job.ID, time.Now().UTC(), "Failed to re-enqueue recovered stale job: "+err.Error())
 		} else {
 			logger.Info("Scheduler successfully re-enqueued recovered stale job", "job_id", job.ID, "type", job.Type)
 

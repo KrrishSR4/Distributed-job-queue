@@ -53,7 +53,7 @@ func (r *PostgresRepository) Create(ctx context.Context, job *models.Job) error 
 	if err != nil {
 		return fmt.Errorf("failed to insert job: %w", err)
 	}
-	
+
 	if cmd.RowsAffected() == 0 && job.IdempotencyKey != nil {
 		return ErrDuplicateIdempotencyKey
 	}
@@ -433,11 +433,11 @@ func (m *MemoryRepository) Delete(ctx context.Context, id string) error {
 	if !exists {
 		return pgx.ErrNoRows
 	}
-	
+
 	if job.IdempotencyKey != nil {
 		delete(m.keys, *job.IdempotencyKey)
 	}
-	
+
 	delete(m.jobs, id)
 	return nil
 }

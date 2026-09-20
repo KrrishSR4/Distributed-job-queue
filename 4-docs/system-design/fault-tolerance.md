@@ -1,4 +1,4 @@
-# Phase 4.2: Fault Tolerance
+# Fault Tolerance
 
 ## Objective
 
