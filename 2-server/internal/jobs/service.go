@@ -8,6 +8,7 @@ import (
 	"time"
 
 	"github.com/KrrishSR4/Distributed-job-queue/server/internal/api/websocket"
+	"github.com/KrrishSR4/Distributed-job-queue/server/internal/metrics"
 	"github.com/KrrishSR4/Distributed-job-queue/server/internal/models"
 	"github.com/KrrishSR4/Distributed-job-queue/server/pkg/logger"
 	"github.com/google/uuid"
@@ -111,6 +112,8 @@ func (s *JobService) CreateJob(ctx context.Context, req models.CreateJobRequest)
 		},
 	})
 
+	metrics.JobsCreatedTotal.WithLabelValues(string(job.Type), string(job.Priority)).Inc()
+
 	return job, nil
 }
 
@@ -182,7 +185,15 @@ func (s *JobService) CancelJob(ctx context.Context, id string) error {
 		return ErrInvalidID
 	}
 
-	err := s.repo.Cancel(ctx, id)
+	job, err := s.repo.GetByID(ctx, id)
+	if err != nil {
+		return err
+	}
+	if job == nil {
+		return ErrJobNotFound
+	}
+
+	err = s.repo.Cancel(ctx, id)
 	if err != nil {
 		return err
 	}
@@ -195,6 +206,8 @@ func (s *JobService) CancelJob(ctx context.Context, id string) error {
 			"status": string(models.StatusCancelled),
 		},
 	})
+
+	metrics.JobsCancelledTotal.WithLabelValues(string(job.Type)).Inc()
 
 	return nil
 }

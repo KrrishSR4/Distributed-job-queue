@@ -8,6 +8,7 @@ import (
 
 	"github.com/KrrishSR4/Distributed-job-queue/server/internal/api/websocket"
 	"github.com/KrrishSR4/Distributed-job-queue/server/internal/jobs"
+	"github.com/KrrishSR4/Distributed-job-queue/server/internal/metrics"
 	"github.com/KrrishSR4/Distributed-job-queue/server/internal/models"
 	"github.com/KrrishSR4/Distributed-job-queue/server/pkg/logger"
 )
@@ -39,6 +40,8 @@ func NewWorker(id string, queue jobs.Queue, repo jobs.Repository, processor JobP
 
 func (w *Worker) Start(ctx context.Context) {
 	logger.Info("Worker started", "worker_id", w.id)
+	metrics.WorkersActive.Inc()
+	defer metrics.WorkersActive.Dec()
 
 	for {
 		select {
@@ -55,6 +58,7 @@ func (w *Worker) Start(ctx context.Context) {
 				return
 			}
 			logger.Error("Error dequeuing job payload", "worker_id", w.id, "error", err)
+			metrics.WorkerErrorsTotal.Inc()
 			time.Sleep(500 * time.Millisecond)
 			continue
 		}
@@ -112,6 +116,9 @@ func (w *Worker) processJobPayload(ctx context.Context, payload *jobs.QueuePaylo
 		},
 	})
 
+	metrics.JobsProcessing.Inc()
+	defer metrics.JobsProcessing.Dec()
+
 	logger.Info("Job processing started", "worker_id", w.id, "job_id", job.ID, "job_type", job.Type)
 
 	timeoutCtx, cancel := context.WithTimeout(ctx, w.jobTimeout)
@@ -148,10 +155,15 @@ func (w *Worker) processJobPayload(ctx context.Context, payload *jobs.QueuePaylo
 			)
 			if err := w.retryMgr.ScheduleRetry(ctx, job, errStr); err != nil {
 				logger.Error("Failed to schedule job retry", "worker_id", w.id, "job_id", job.ID, "error", err)
+				metrics.WorkerErrorsTotal.Inc()
+			} else {
+				metrics.JobsRetriedTotal.WithLabelValues(string(job.Type)).Inc()
 			}
 		} else {
+			metrics.JobsFailedTotal.WithLabelValues(string(job.Type)).Inc()
 			if err := w.repo.UpdateStatusFailed(ctx, job.ID, failedAt, errStr); err != nil {
 				logger.Error("Failed to update job status to failed", "worker_id", w.id, "job_id", job.ID, "error", err)
+				metrics.WorkerErrorsTotal.Inc()
 			}
 
 			w.pub.Publish(websocket.Event{
@@ -191,7 +203,9 @@ func (w *Worker) processJobPayload(ctx context.Context, payload *jobs.QueuePaylo
 					"reason", errStr,
 					"error", err,
 				)
+				metrics.WorkerErrorsTotal.Inc()
 			} else {
+				metrics.JobsDLQTotal.WithLabelValues(string(job.Type)).Inc()
 				logger.Info("Job moved to Dead Letter Queue (DLQ)",
 					"worker_id", w.id,
 					"job_id", job.ID,
@@ -231,5 +245,12 @@ func (w *Worker) processJobPayload(ctx context.Context, payload *jobs.QueuePaylo
 				"status": string(models.StatusCompleted),
 			},
 		})
+		metrics.JobsCompletedTotal.WithLabelValues(string(job.Type)).Inc()
 	}
+	
+	statusStr := "success"
+	if procErr != nil {
+		statusStr = "error"
+	}
+	metrics.JobProcessingDuration.WithLabelValues(string(job.Type), statusStr).Observe(duration.Seconds())
 }

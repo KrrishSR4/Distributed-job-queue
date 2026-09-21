@@ -6,8 +6,10 @@ import (
 	"github.com/KrrishSR4/Distributed-job-queue/server/internal/api/handlers"
 	appMiddleware "github.com/KrrishSR4/Distributed-job-queue/server/internal/api/middleware"
 	"github.com/KrrishSR4/Distributed-job-queue/server/internal/api/websocket"
+	"github.com/KrrishSR4/Distributed-job-queue/server/internal/metrics"
 	"github.com/KrrishSR4/Distributed-job-queue/server/pkg/response"
 	"github.com/go-chi/chi/v5"
+	"github.com/prometheus/client_golang/prometheus/promhttp"
 )
 
 func SetupRouter(allowedOrigin string, healthHandler *handlers.HealthHandler, jobHandler *handlers.JobHandler, wsHub *websocket.Hub) http.Handler {
@@ -18,6 +20,10 @@ func SetupRouter(allowedOrigin string, healthHandler *handlers.HealthHandler, jo
 	r.Use(appMiddleware.Logger)
 	r.Use(appMiddleware.Recovery)
 	r.Use(appMiddleware.SetupCORS(allowedOrigin))
+	r.Use(metrics.Middleware())
+
+	// Prometheus Metrics Endpoint
+	r.Handle("/metrics", promhttp.Handler())
 
 	// Health Check
 	r.Get("/health", healthHandler.HealthCheck)
