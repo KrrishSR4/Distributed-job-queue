@@ -1,0 +1,82 @@
+{
+  "title": "Jobs and Workers",
+  "timezone": "browser",
+  "refresh": "10s",
+  "time": { "from": "now-1h", "to": "now" },
+  "templating": {
+    "list": [
+      {
+        "name": "job_type",
+        "type": "query",
+        "datasource": "Prometheus",
+        "query": "label_values(djq_jobs_created_total, job_type)",
+        "includeAll": true,
+        "multi": true
+      },
+      {
+        "name": "priority",
+        "type": "query",
+        "datasource": "Prometheus",
+        "query": "label_values(djq_jobs_created_total, priority)",
+        "includeAll": true,
+        "multi": true
+      }
+    ]
+  },
+  "panels": [
+    {
+      "type": "stat",
+      "title": "Active Workers",
+      "gridPos": { "h": 4, "w": 4, "x": 0, "y": 0 },
+      "targets": [{ "expr": "djq_workers_active" }]
+    },
+    {
+      "type": "stat",
+      "title": "Jobs Processing",
+      "gridPos": { "h": 4, "w": 4, "x": 4, "y": 0 },
+      "targets": [{ "expr": "djq_jobs_processing" }]
+    },
+    {
+      "type": "stat",
+      "title": "Worker Errors",
+      "gridPos": { "h": 4, "w": 4, "x": 8, "y": 0 },
+      "targets": [{ "expr": "sum(rate(djq_worker_errors_total[1m]))" }]
+    },
+    {
+      "type": "stat",
+      "title": "Queue Depth",
+      "gridPos": { "h": 4, "w": 4, "x": 12, "y": 0 },
+      "targets": [{ "expr": "sum(djq_jobs_created_total{job_type=~\"$job_type\", priority=~\"$priority\"}) - sum(djq_jobs_completed_total{job_type=~\"$job_type\"}) - sum(djq_jobs_failed_total{job_type=~\"$job_type\"}) - sum(djq_jobs_cancelled_total{job_type=~\"$job_type\"})" }]
+    },
+    {
+      "type": "timeseries",
+      "title": "Jobs Created over Time",
+      "gridPos": { "h": 8, "w": 12, "x": 0, "y": 4 },
+      "targets": [{ "expr": "sum(rate(djq_jobs_created_total{job_type=~\"$job_type\", priority=~\"$priority\"}[1m])) by (job_type)", "legendFormat": "{{job_type}}" }]
+    },
+    {
+      "type": "timeseries",
+      "title": "Job Outcomes over Time (Completed vs Failed vs Cancelled vs Retried vs DLQ)",
+      "gridPos": { "h": 8, "w": 12, "x": 12, "y": 4 },
+      "targets": [
+        { "expr": "sum(rate(djq_jobs_completed_total{job_type=~\"$job_type\"}[1m]))", "legendFormat": "Completed" },
+        { "expr": "sum(rate(djq_jobs_failed_total{job_type=~\"$job_type\"}[1m]))", "legendFormat": "Failed" },
+        { "expr": "sum(rate(djq_jobs_cancelled_total{job_type=~\"$job_type\"}[1m]))", "legendFormat": "Cancelled" },
+        { "expr": "sum(rate(djq_jobs_retried_total{job_type=~\"$job_type\"}[1m]))", "legendFormat": "Retried" },
+        { "expr": "sum(rate(djq_jobs_dlq_total{job_type=~\"$job_type\"}[1m]))", "legendFormat": "DLQ" }
+      ]
+    },
+    {
+      "type": "timeseries",
+      "title": "Queue Backlog over Time",
+      "gridPos": { "h": 8, "w": 12, "x": 0, "y": 12 },
+      "targets": [{ "expr": "sum(djq_jobs_created_total{job_type=~\"$job_type\"}) - sum(djq_jobs_completed_total{job_type=~\"$job_type\"}) - sum(djq_jobs_failed_total{job_type=~\"$job_type\"}) - sum(djq_jobs_cancelled_total{job_type=~\"$job_type\"})", "legendFormat": "Backlog" }]
+    },
+    {
+      "type": "timeseries",
+      "title": "Job Processing Duration (P95) by Type",
+      "gridPos": { "h": 8, "w": 12, "x": 12, "y": 12 },
+      "targets": [{ "expr": "histogram_quantile(0.95, sum(rate(djq_job_processing_duration_seconds_bucket{job_type=~\"$job_type\"}[1m])) by (le, job_type))", "legendFormat": "{{job_type}}" }]
+    }
+  ]
+}

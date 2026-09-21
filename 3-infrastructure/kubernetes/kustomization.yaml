@@ -12,3 +12,11 @@ resources:
   - api.yaml
   - worker.yaml
   - frontend.yaml
+  - grafana.yaml
+
+configMapGenerator:
+  - name: grafana-dashboards
+    files:
+      - ../grafana/dashboards/overview.json
+      - ../grafana/dashboards/api.json
+      - ../grafana/dashboards/jobs-workers.json

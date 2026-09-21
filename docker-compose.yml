@@ -91,5 +91,24 @@ services:
     networks:
       - djq-network
 
+  grafana:
+    image: grafana/grafana:latest
+    container_name: djq_grafana
+    ports:
+      - "3000:3000"
+    volumes:
+      - grafana_data:/var/lib/grafana
+      - ./3-infrastructure/grafana/provisioning:/etc/grafana/provisioning:ro
+      - ./3-infrastructure/grafana/dashboards:/var/lib/grafana/dashboards:ro
+    depends_on:
+      - prometheus
+    restart: unless-stopped
+    networks:
+      - djq-network
+
 volumes:
   postgres_data:
+  grafana_data:
+
+networks:
+  djq-network:

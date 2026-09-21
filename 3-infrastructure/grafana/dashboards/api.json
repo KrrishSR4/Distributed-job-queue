@@ -1,0 +1,62 @@
+{
+  "title": "API Dashboard",
+  "timezone": "browser",
+  "refresh": "10s",
+  "time": { "from": "now-1h", "to": "now" },
+  "templating": {
+    "list": [
+      {
+        "name": "route",
+        "type": "query",
+        "datasource": "Prometheus",
+        "query": "label_values(djq_http_requests_total, route)",
+        "includeAll": true,
+        "multi": true
+      }
+    ]
+  },
+  "panels": [
+    {
+      "type": "stat",
+      "title": "Requests In Flight",
+      "gridPos": { "h": 4, "w": 4, "x": 0, "y": 0 },
+      "targets": [{ "expr": "djq_http_requests_in_flight" }]
+    },
+    {
+      "type": "stat",
+      "title": "Global 4xx Rate",
+      "gridPos": { "h": 4, "w": 4, "x": 4, "y": 0 },
+      "targets": [{ "expr": "sum(rate(djq_http_requests_total{status=~\"4..\"}[1m]))" }]
+    },
+    {
+      "type": "stat",
+      "title": "Global 5xx Rate",
+      "gridPos": { "h": 4, "w": 4, "x": 8, "y": 0 },
+      "targets": [{ "expr": "sum(rate(djq_http_requests_total{status=~\"5..\"}[1m]))" }]
+    },
+    {
+      "type": "timeseries",
+      "title": "HTTP Request Rate by Route",
+      "gridPos": { "h": 8, "w": 12, "x": 0, "y": 4 },
+      "targets": [{ "expr": "sum(rate(djq_http_requests_total{route=~\"$route\"}[1m])) by (route, method)", "legendFormat": "{{method}} {{route}}" }]
+    },
+    {
+      "type": "timeseries",
+      "title": "HTTP Response Status Distribution",
+      "gridPos": { "h": 8, "w": 12, "x": 12, "y": 4 },
+      "targets": [{ "expr": "sum(rate(djq_http_requests_total{route=~\"$route\"}[1m])) by (status)", "legendFormat": "HTTP {{status}}" }]
+    },
+    {
+      "type": "timeseries",
+      "title": "P95 Latency by Route",
+      "gridPos": { "h": 8, "w": 12, "x": 0, "y": 12 },
+      "targets": [{ "expr": "histogram_quantile(0.95, sum(rate(djq_http_request_duration_seconds_bucket{route=~\"$route\"}[1m])) by (le, route))", "legendFormat": "{{route}}" }]
+    },
+    {
+      "type": "timeseries",
+      "title": "P50 Latency by Route",
+      "gridPos": { "h": 8, "w": 12, "x": 12, "y": 12 },
+      "targets": [{ "expr": "histogram_quantile(0.50, sum(rate(djq_http_request_duration_seconds_bucket{route=~\"$route\"}[1m])) by (le, route))", "legendFormat": "{{route}}" }]
+    }
+  ]
+}
