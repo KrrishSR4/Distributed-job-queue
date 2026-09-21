@@ -117,6 +117,24 @@ For full architectural diagrams, component data flows, and performance benchmark
 
 ---
 
+## 🐳 Dockerization (Phase 6.1)
+
+The application components are fully containerized using multi-stage Docker builds.
+
+Available images:
+- **Go Backend (`2-server/Dockerfile`)**: Unified image capable of running as the REST API or the Background Worker (controlled via `APP_MODE` env var).
+- **Angular Frontend (`1-client/Dockerfile`)**: Minimal Nginx runtime serving the static UI build.
+
+Basic individual build commands:
+```bash
+cd 2-server && docker build -t d-job-queue-api .
+cd ../1-client && docker build -t d-job-queue-client .
+```
+
+For detailed containerization patterns, security basics, and architecture, see the **[Dockerization Documentation](4-docs/docker/dockerization.md)**.
+
+---
+
 ## 📄 License
 
 This project is licensed under the [MIT License](LICENSE).

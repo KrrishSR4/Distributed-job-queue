@@ -1,0 +1,11 @@
+.git
+.vscode
+.idea
+.env
+.DS_Store
+vendor/
+*.exe
+*.test
+*.log
+*.out
+dist-job-queue
