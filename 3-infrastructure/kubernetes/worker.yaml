@@ -4,7 +4,12 @@ metadata:
   name: worker
   namespace: distributed-job-queue
 spec:
-  replicas: 3
+  replicas: 2
+  strategy:
+    type: RollingUpdate
+    rollingUpdate:
+      maxSurge: 1
+      maxUnavailable: 0
   selector:
     matchLabels:
       app: worker
@@ -13,6 +18,7 @@ spec:
       labels:
         app: worker
     spec:
+      terminationGracePeriodSeconds: 60
       containers:
         - name: worker
           image: distributedjobqueue-worker:latest
