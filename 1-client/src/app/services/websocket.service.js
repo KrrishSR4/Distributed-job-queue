@@ -8,7 +8,7 @@ export class WebsocketService {
   ws = null;
   reconnectAttempts = 0;
   maxReconnectAttempts = 5;
-  url = 'ws://localhost:8080/ws';
+  url = `ws://${window.location.host}/ws`;
   
   events$ = new Subject();
   connectionStatus$ = new Subject(); // 'connected', 'connecting', 'disconnected'

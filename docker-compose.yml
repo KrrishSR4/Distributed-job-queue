@@ -2,14 +2,14 @@ version: '3.8'
 
 services:
   # Phase 1: Frontend Client
-  client:
+  frontend:
     build:
       context: ./1-client
       dockerfile: Dockerfile
     ports:
-      - "4200:4200"
-    environment:
-      - NODE_ENV=development
+      - "4200:80"
+    depends_on:
+      - api
 
   # Phase 2 & 4: Go Backend API
   api:
@@ -25,8 +25,10 @@ services:
       - REDIS_URL=redis://redis:6379
       - PORT=8080
     depends_on:
-      - redis
-      - postgres
+      redis:
+        condition: service_healthy
+      postgres:
+        condition: service_healthy
 
   # Phase 4: Go Backend Worker Pool
   worker:
@@ -40,8 +42,10 @@ services:
       - REDIS_URL=redis://redis:6379
       - WORKER_COUNT=3
     depends_on:
-      - redis
-      - postgres
+      redis:
+        condition: service_healthy
+      postgres:
+        condition: service_healthy
 
   # Phase 3: Redis Job Broker & Pub/Sub
   redis:
@@ -59,9 +63,20 @@ services:
   # Phase 2: PostgreSQL Database
   postgres:
     image: postgres:16-alpine
+    container_name: djq-postgres
     environment:
       POSTGRES_USER: djq
       POSTGRES_PASSWORD: djqpassword
       POSTGRES_DB: djq_db
     ports:
       - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U djq -d djq_db"]
+      interval: 5s
+      timeout: 3s
+      retries: 5
+
+volumes:
+  postgres_data:

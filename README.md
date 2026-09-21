@@ -117,7 +117,7 @@ For full architectural diagrams, component data flows, and performance benchmark
 
 ---
 
-## 🐳 Dockerization (Phase 6.1)
+## 🐳 Dockerization (Phase 6.1 & 6.2)
 
 The application components are fully containerized using multi-stage Docker builds.
 
@@ -125,13 +125,20 @@ Available images:
 - **Go Backend (`2-server/Dockerfile`)**: Unified image capable of running as the REST API or the Background Worker (controlled via `APP_MODE` env var).
 - **Angular Frontend (`1-client/Dockerfile`)**: Minimal Nginx runtime serving the static UI build.
 
-Basic individual build commands:
+The application has been fully containerized and orchestrated with Docker Compose.
+
+**Run the Full Stack (Frontend, API, Workers, Redis, Postgres):**
 ```bash
-cd 2-server && docker build -t d-job-queue-api .
-cd ../1-client && docker build -t d-job-queue-client .
+docker compose up -d --build
+```
+*Access the dashboard at [http://localhost:4200](http://localhost:4200).*
+
+**Scale Workers:**
+```bash
+docker compose up -d --scale worker=3
 ```
 
-For detailed containerization patterns, security basics, and architecture, see the **[Dockerization Documentation](4-docs/docker/dockerization.md)**.
+For detailed architecture and internal container commands, see [Dockerization Docs](4-docs/docker/dockerization.md) and [Docker Compose Docs](4-docs/docker/docker-compose.md).
 
 ---
 

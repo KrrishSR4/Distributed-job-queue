@@ -7,7 +7,7 @@ import { WebsocketService } from './websocket.service.js';
 })
 export class JobService {
   wsService = inject(WebsocketService);
-  apiUrl = 'http://localhost:8080/api/v1/jobs';
+  apiUrl = '/api/v1/jobs';
 
   constructor() {
     this.jobsSubject = new BehaviorSubject([]);

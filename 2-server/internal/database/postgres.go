@@ -76,34 +76,48 @@ func (db *Database) AutoMigrate(ctx context.Context) error {
 		return fmt.Errorf("cannot run migrations on nil database pool")
 	}
 
-	paths := []string{
+	mig1Paths := []string{
 		"migrations/000001_create_jobs_table.up.sql",
 		"2-server/migrations/000001_create_jobs_table.up.sql",
 		"../migrations/000001_create_jobs_table.up.sql",
 		"../../migrations/000001_create_jobs_table.up.sql",
 	}
 
-	var sqlScript string
-	for _, p := range paths {
-		if content, err := os.ReadFile(p); err == nil {
-			sqlScript = string(content)
-			break
+	mig2Paths := []string{
+		"migrations/000002_add_idempotency_key_to_jobs.up.sql",
+		"2-server/migrations/000002_add_idempotency_key_to_jobs.up.sql",
+		"../migrations/000002_add_idempotency_key_to_jobs.up.sql",
+		"../../migrations/000002_add_idempotency_key_to_jobs.up.sql",
+	}
+
+	runMigration := func(paths []string, fallbackSQL string) error {
+		var sqlScript string
+		for _, p := range paths {
+			if content, err := os.ReadFile(p); err == nil {
+				sqlScript = string(content)
+				break
+			}
 		}
+		if sqlScript == "" {
+			sqlScript = fallbackSQL
+		}
+		
+		migCtx, cancel := context.WithTimeout(ctx, 5*time.Second)
+		defer cancel()
+		
+		_, err := db.Pool.Exec(migCtx, sqlScript)
+		return err
 	}
 
-	if sqlScript == "" {
-		sqlScript = defaultJobsTableMigrationSQL
+	if err := runMigration(mig1Paths, defaultJobsTableMigrationSQL); err != nil {
+		return fmt.Errorf("failed to run migration 1: %w", err)
 	}
 
-	migCtx, cancel := context.WithTimeout(ctx, 5*time.Second)
-	defer cancel()
-
-	_, err := db.Pool.Exec(migCtx, sqlScript)
-	if err != nil {
-		return fmt.Errorf("failed to run jobs migration: %w", err)
+	if err := runMigration(mig2Paths, "ALTER TABLE jobs ADD COLUMN IF NOT EXISTS idempotency_key VARCHAR(255) UNIQUE;"); err != nil {
+		return fmt.Errorf("failed to run migration 2: %w", err)
 	}
 
-	logger.Info("Successfully verified/applied database migration for jobs table")
+	logger.Info("Successfully verified/applied database migrations")
 	return nil
 }
 
