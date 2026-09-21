@@ -142,6 +142,36 @@ For detailed architecture and internal container commands, see [Dockerization Do
 
 ---
 
+## ☸️ Kubernetes Orchestration (Phase 6.3 - 6.6)
+
+The application includes production-ready Kubernetes manifests featuring proper networking, internal DNS routing, graceful graceful shutdowns, and horizontal scaling.
+
+**Deploy the Complete Stack:**
+```bash
+# Apply all manifests using Kustomize
+kubectl apply -k 3-infrastructure/kubernetes/
+```
+
+**Access the Application:**
+The Frontend is exposed via a NodePort on port `30000`. Navigate to:
+[http://localhost:30000](http://localhost:30000)
+
+**Monitor Pods & Services:**
+```bash
+kubectl get pods -n distributed-job-queue
+kubectl get svc -n distributed-job-queue
+```
+
+**Manual Horizontal Scaling:**
+```bash
+kubectl scale deployment api --replicas=3 -n distributed-job-queue
+kubectl scale deployment worker --replicas=5 -n distributed-job-queue
+```
+
+For a deep dive into the Kubernetes topology and scaling mechanics, see the [Kubernetes Validation Docs](4-docs/kubernetes/validation.md).
+
+---
+
 ## 📄 License
 
 This project is licensed under the [MIT License](LICENSE).
