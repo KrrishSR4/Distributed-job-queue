@@ -1,0 +1,58 @@
+logging {
+  level = "info"
+}
+
+// Discover Docker containers
+discovery.docker "containers" {
+  host = "unix:///var/run/docker.sock"
+}
+
+// Relabel to extract service names and drop other containers
+discovery.relabel "logs" {
+  targets = discovery.docker.containers.targets
+
+  rule {
+    source_labels = ["__meta_docker_container_name"]
+    regex = "/djq-(.*)|/(api|worker)"
+    action = "keep"
+  }
+
+  rule {
+    source_labels = ["__meta_docker_container_name"]
+    regex = "/djq-(.*)|/(api|worker)"
+    target_label = "service"
+    replacement = "$1$2"
+  }
+}
+
+// Collect logs from discovered containers
+loki.source.docker "logs" {
+  host    = "unix:///var/run/docker.sock"
+  targets = discovery.relabel.logs.output
+  forward_to = [loki.process.json_extract.receiver]
+}
+
+// Parse JSON logs and attach low-cardinality labels
+loki.process "json_extract" {
+  forward_to = [loki.write.local.receiver]
+
+  stage.json {
+    expressions = {
+      level = "level",
+    }
+  }
+
+  // Only map low-cardinality fields to labels
+  stage.labels {
+    values = {
+      level = "level",
+    }
+  }
+}
+
+// Send logs to Loki
+loki.write "local" {
+  endpoint {
+    url = "http://loki:3100/loki/api/v1/push"
+  }
+}

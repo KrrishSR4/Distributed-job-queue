@@ -26,6 +26,8 @@ spec:
           env:
             - name: APP_MODE
               value: "worker"
+            - name: APP_ENV
+              value: "production"
             - name: INSTANCE_ID
               valueFrom:
                 fieldRef:

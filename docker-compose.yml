@@ -20,6 +20,7 @@ services:
       - "8080:8080"
     environment:
       - APP_MODE=api
+      - APP_ENV=production
       - INSTANCE_ID=api-node-1
       - DATABASE_URL=postgres://djq:djqpassword@postgres:5432/djq_db?sslmode=disable
       - REDIS_URL=redis://redis:6379
@@ -29,6 +30,8 @@ services:
         condition: service_healthy
       postgres:
         condition: service_healthy
+    networks:
+      - djq-network
 
   # Phase 4: Go Backend Worker Pool
   worker:
@@ -37,6 +40,7 @@ services:
       dockerfile: Dockerfile
     environment:
       - APP_MODE=worker
+      - APP_ENV=production
       - INSTANCE_ID=worker-node
       - DATABASE_URL=postgres://djq:djqpassword@postgres:5432/djq_db?sslmode=disable
       - REDIS_URL=redis://redis:6379
@@ -46,6 +50,8 @@ services:
         condition: service_healthy
       postgres:
         condition: service_healthy
+    networks:
+      - djq-network
 
   # Phase 3: Redis Job Broker & Pub/Sub
   redis:
@@ -59,6 +65,8 @@ services:
       interval: 5s
       timeout: 3s
       retries: 5
+    networks:
+      - djq-network
 
   # Phase 2: PostgreSQL Database
   postgres:
@@ -77,6 +85,8 @@ services:
       interval: 5s
       timeout: 3s
       retries: 5
+    networks:
+      - djq-network
 
   prometheus:
     image: prom/prometheus:latest
@@ -87,6 +97,32 @@ services:
       - ./3-infrastructure/prometheus/prometheus.yml:/etc/prometheus/prometheus.yml:ro
     depends_on:
       - api
+    restart: unless-stopped
+    networks:
+      - djq-network
+
+  loki:
+    image: grafana/loki:latest
+    container_name: djq_loki
+    ports:
+      - "3100:3100"
+    command: -config.file=/etc/loki/local-config.yaml
+    volumes:
+      - ./3-infrastructure/loki/loki-config.yml:/etc/loki/local-config.yaml:ro
+      - loki_data:/loki
+    restart: unless-stopped
+    networks:
+      - djq-network
+
+  alloy:
+    image: grafana/alloy:latest
+    container_name: djq_alloy
+    volumes:
+      - ./3-infrastructure/alloy/config.alloy:/etc/alloy/config.alloy:ro
+      - /var/run/docker.sock:/var/run/docker.sock
+    command: run --server.http.listen-addr=0.0.0.0:12345 /etc/alloy/config.alloy
+    depends_on:
+      - loki
     restart: unless-stopped
     networks:
       - djq-network
@@ -102,6 +138,7 @@ services:
       - ./3-infrastructure/grafana/dashboards:/var/lib/grafana/dashboards:ro
     depends_on:
       - prometheus
+      - loki
     restart: unless-stopped
     networks:
       - djq-network
@@ -109,6 +146,7 @@ services:
 volumes:
   postgres_data:
   grafana_data:
+  loki_data:
 
 networks:
   djq-network:

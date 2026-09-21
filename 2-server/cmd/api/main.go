@@ -24,7 +24,7 @@ import (
 func main() {
 	cfg := config.Load()
 
-	log := logger.Init(cfg.AppEnv)
+	log := logger.Init(cfg.AppEnv, cfg.AppMode)
 	log.Info("Starting Distributed Job Queue API Server...",
 		"env", cfg.AppEnv,
 		"port", cfg.Port,

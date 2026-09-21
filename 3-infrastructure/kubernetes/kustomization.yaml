@@ -13,6 +13,8 @@ resources:
   - worker.yaml
   - frontend.yaml
   - grafana.yaml
+  - loki.yaml
+  - alloy.yaml
 
 configMapGenerator:
   - name: grafana-dashboards

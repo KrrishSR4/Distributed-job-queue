@@ -13,7 +13,7 @@ import (
 )
 
 func init() {
-	logger.Init("test")
+	logger.Init("test", "test")
 }
 
 func TestHubRegistrationAndBroadcast(t *testing.T) {

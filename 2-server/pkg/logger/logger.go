@@ -9,7 +9,7 @@ import (
 
 var globalLogger *slog.Logger
 
-func Init(env string) *slog.Logger {
+func Init(env string, service string) *slog.Logger {
 	var handler slog.Handler
 
 	opts := &slog.HandlerOptions{
@@ -23,14 +23,14 @@ func Init(env string) *slog.Logger {
 		handler = slog.NewJSONHandler(os.Stdout, opts)
 	}
 
-	globalLogger = slog.New(handler)
+	globalLogger = slog.New(handler).With("service", service)
 	slog.SetDefault(globalLogger)
 	return globalLogger
 }
 
 func Get() *slog.Logger {
 	if globalLogger == nil {
-		return Init("development")
+		return Init("development", "unknown")
 	}
 	return globalLogger
 }
