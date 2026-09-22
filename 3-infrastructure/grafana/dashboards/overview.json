@@ -1,5 +1,6 @@
 {
-  "title": "Distributed Job Queue - Overview",
+  "title": "Distributed Job Queue - Observability Overview",
+  "uid": "djq-overview",
   "timezone": "browser",
   "refresh": "10s",
   "time": {
@@ -8,50 +9,137 @@
   },
   "panels": [
     {
+      "type": "text",
+      "title": "Navigation",
+      "gridPos": { "h": 2, "w": 24, "x": 0, "y": 0 },
+      "options": {
+        "content": "[API Dashboard](/d/djq-api) | [Jobs & Workers Dashboard](/d/djq-jobs) | [Logs Dashboard](/d/djq-logs)",
+        "mode": "markdown"
+      }
+    },
+    {
+      "type": "row",
+      "title": "System Health",
+      "gridPos": { "h": 1, "w": 24, "x": 0, "y": 2 }
+    },
+    {
+      "type": "stat",
+      "title": "API Request Rate",
+      "gridPos": { "h": 4, "w": 4, "x": 0, "y": 3 },
+      "targets": [{ "expr": "sum(rate(djq_http_requests_total[1m]))", "refId": "A" }]
+    },
+    {
+      "type": "stat",
+      "title": "API 5xx Rate",
+      "gridPos": { "h": 4, "w": 4, "x": 4, "y": 3 },
+      "targets": [{ "expr": "sum(rate(djq_http_requests_total{status=~\"5..\"}[1m]))", "refId": "A" }],
+      "fieldConfig": {
+        "defaults": {
+          "links": [
+            {
+              "title": "View API 5xx/Error Logs",
+              "url": "/explore?left={\"datasource\":\"Loki\",\"queries\":[{\"refId\":\"A\",\"expr\":\"{service=\\\"api\\\"} | json | level=~\\\"(?i)ERROR|WARN\\\"\"}],\"range\":{\"from\":\"${__from}\",\"to\":\"${__to}\"}}",
+              "targetBlank": true
+            }
+          ]
+        }
+      }
+    },
+    {
+      "type": "stat",
+      "title": "P95 HTTP Latency",
+      "gridPos": { "h": 4, "w": 4, "x": 8, "y": 3 },
+      "targets": [{ "expr": "histogram_quantile(0.95, sum(rate(djq_http_request_duration_seconds_bucket[1m])) by (le))", "refId": "A" }]
+    },
+    {
       "type": "stat",
       "title": "Active Workers",
-      "gridPos": { "h": 4, "w": 4, "x": 0, "y": 0 },
+      "gridPos": { "h": 4, "w": 4, "x": 12, "y": 3 },
       "targets": [{ "expr": "djq_workers_active", "refId": "A" }]
     },
     {
       "type": "stat",
       "title": "Jobs Processing",
-      "gridPos": { "h": 4, "w": 4, "x": 4, "y": 0 },
+      "gridPos": { "h": 4, "w": 4, "x": 16, "y": 3 },
       "targets": [{ "expr": "djq_jobs_processing", "refId": "A" }]
     },
     {
       "type": "stat",
-      "title": "Requests In Flight",
-      "gridPos": { "h": 4, "w": 4, "x": 8, "y": 0 },
-      "targets": [{ "expr": "djq_http_requests_in_flight", "refId": "A" }]
-    },
-    {
-      "type": "stat",
       "title": "Queue Depth (Estimated)",
-      "gridPos": { "h": 4, "w": 4, "x": 12, "y": 0 },
+      "gridPos": { "h": 4, "w": 4, "x": 20, "y": 3 },
       "targets": [{ "expr": "sum(djq_jobs_created_total) - sum(djq_jobs_completed_total) - sum(djq_jobs_failed_total) - sum(djq_jobs_cancelled_total)", "refId": "A" }]
     },
     {
-      "type": "timeseries",
-      "title": "HTTP Request Rate",
-      "gridPos": { "h": 8, "w": 12, "x": 0, "y": 4 },
-      "targets": [{ "expr": "sum(rate(djq_http_requests_total[1m])) by (status)", "legendFormat": "{{status}}", "refId": "A" }]
+      "type": "row",
+      "title": "Job Health",
+      "gridPos": { "h": 1, "w": 24, "x": 0, "y": 7 }
     },
     {
       "type": "timeseries",
-      "title": "Job Completion Rate",
-      "gridPos": { "h": 8, "w": 12, "x": 12, "y": 4 },
+      "title": "Job Outcomes",
+      "gridPos": { "h": 8, "w": 18, "x": 0, "y": 8 },
       "targets": [
         { "expr": "sum(rate(djq_jobs_completed_total[1m]))", "legendFormat": "Completed", "refId": "A" },
         { "expr": "sum(rate(djq_jobs_failed_total[1m]))", "legendFormat": "Failed", "refId": "B" },
         { "expr": "sum(rate(djq_jobs_dlq_total[1m]))", "legendFormat": "DLQ", "refId": "C" }
+      ],
+      "fieldConfig": {
+        "defaults": {
+          "links": [
+            {
+              "title": "View Failed/DLQ Logs",
+              "url": "/explore?left={\"datasource\":\"Loki\",\"queries\":[{\"refId\":\"A\",\"expr\":\"{service=\\\"worker\\\"} | json | status=~\\\"(?i)failed|dlq\\\"\"}],\"range\":{\"from\":\"${__from}\",\"to\":\"${__to}\"}}",
+              "targetBlank": true
+            }
+          ]
+        }
+      }
+    },
+    {
+      "type": "stat",
+      "title": "DLQ Depth",
+      "gridPos": { "h": 8, "w": 6, "x": 18, "y": 8 },
+      "targets": [{ "expr": "sum(djq_jobs_dlq_total)", "refId": "A" }],
+      "fieldConfig": {
+        "defaults": {
+          "links": [
+            {
+              "title": "View DLQ Logs",
+              "url": "/explore?left={\"datasource\":\"Loki\",\"queries\":[{\"refId\":\"A\",\"expr\":\"{service=\\\"worker\\\"} | json | status=\\\"dlq\\\"\"}],\"range\":{\"from\":\"${__from}\",\"to\":\"${__to}\"}}",
+              "targetBlank": true
+            }
+          ]
+        }
+      }
+    },
+    {
+      "type": "row",
+      "title": "Log Health",
+      "gridPos": { "h": 1, "w": 24, "x": 0, "y": 16 }
+    },
+    {
+      "type": "logs",
+      "title": "Recent API Errors",
+      "gridPos": { "h": 10, "w": 12, "x": 0, "y": 17 },
+      "targets": [
+        {
+          "datasource": "Loki",
+          "expr": "{service=\"api\"} | json | level=~\"(?i)ERROR|WARN\"",
+          "refId": "A"
+        }
       ]
     },
     {
-      "type": "timeseries",
-      "title": "P95 HTTP Latency",
-      "gridPos": { "h": 8, "w": 12, "x": 0, "y": 12 },
-      "targets": [{ "expr": "histogram_quantile(0.95, sum(rate(djq_http_request_duration_seconds_bucket[1m])) by (le))", "legendFormat": "p95", "refId": "A" }]
+      "type": "logs",
+      "title": "Recent Worker Errors",
+      "gridPos": { "h": 10, "w": 12, "x": 12, "y": 17 },
+      "targets": [
+        {
+          "datasource": "Loki",
+          "expr": "{service=\"worker\"} | json | level=~\"(?i)ERROR|WARN\" or status=~\"(?i)failed|dlq\"",
+          "refId": "A"
+        }
+      ]
     }
   ]
 }

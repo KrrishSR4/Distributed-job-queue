@@ -112,8 +112,7 @@ The Distributed Job Queue features a highly decoupled, scalable architecture des
 - **Idempotency**: Implemented via database unique constraints to protect against duplicate HTTP requests.
 - **Fault Tolerance**: Includes automatic stale-job recovery, exponential backoff retries, and a Dead Letter Queue (DLQ).
 - **Real-Time UI**: WebSockets stream status updates to the Angular Dashboard without polling.
-- **Observability**: Prometheus metrics, Grafana dashboards, and Loki centralized logging natively integrated to monitor HTTP traffic, worker performance, and job lifecycles.
-  - *Workflow:* Identify anomalies via Metrics → Investigate root cause via Logs → Verify state in DB/Redis.
+- **Observability**: A complete production observability stack (`Prometheus` → `Grafana` for metrics, and `Alloy` → `Loki` → `Grafana` for logs). Features a unified "Observability Overview" dashboard, correlating metric anomalies (e.g., 5xx spikes) directly to contextual logs for rapid root-cause analysis without high-cardinality index explosions.
 
 For full architectural diagrams, component data flows, and performance benchmarks, see the **[System Design Documentation](4-docs/system-design/overview.md)**.
 
