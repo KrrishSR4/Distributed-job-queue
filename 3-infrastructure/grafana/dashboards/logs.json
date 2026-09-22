@@ -1,0 +1,70 @@
+{
+  "title": "Distributed Job Queue - Logs",
+  "uid": "djq-logs",
+  "timezone": "browser",
+  "refresh": "10s",
+  "time": {
+    "from": "now-1h",
+    "to": "now"
+  },
+  "templating": {
+    "list": [
+      {
+        "name": "job_id",
+        "type": "textbox",
+        "query": "",
+        "label": "Search by Job ID (Optional)"
+      }
+    ]
+  },
+  "panels": [
+    {
+      "type": "logs",
+      "title": "API Logs",
+      "gridPos": { "h": 10, "w": 12, "x": 0, "y": 0 },
+      "targets": [
+        {
+          "datasource": "Loki",
+          "expr": "{service=\"api\"} | json | line_format \"{{.message}} (Level: {{.level}})\" |~ \"(?i).*$job_id.*\"",
+          "refId": "A"
+        }
+      ]
+    },
+    {
+      "type": "logs",
+      "title": "Worker Logs",
+      "gridPos": { "h": 10, "w": 12, "x": 12, "y": 0 },
+      "targets": [
+        {
+          "datasource": "Loki",
+          "expr": "{service=\"worker\"} | json | line_format \"{{.message}} (Level: {{.level}})\" |~ \"(?i).*$job_id.*\"",
+          "refId": "A"
+        }
+      ]
+    },
+    {
+      "type": "logs",
+      "title": "API Errors",
+      "gridPos": { "h": 10, "w": 12, "x": 0, "y": 10 },
+      "targets": [
+        {
+          "datasource": "Loki",
+          "expr": "{service=\"api\"} | json | level=~\"(?i)ERROR|WARN\" |~ \"(?i).*$job_id.*\"",
+          "refId": "A"
+        }
+      ]
+    },
+    {
+      "type": "logs",
+      "title": "Worker Errors / Failures / DLQ",
+      "gridPos": { "h": 10, "w": 12, "x": 12, "y": 10 },
+      "targets": [
+        {
+          "datasource": "Loki",
+          "expr": "{service=\"worker\"} | json | level=~\"(?i)ERROR|WARN\" or status=~\"(?i)failed|retrying|dlq\" |~ \"(?i).*$job_id.*\"",
+          "refId": "A"
+        }
+      ]
+    }
+  ]
+}

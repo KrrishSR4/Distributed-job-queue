@@ -40,7 +40,18 @@
       "type": "stat",
       "title": "Worker Errors",
       "gridPos": { "h": 4, "w": 4, "x": 8, "y": 0 },
-      "targets": [{ "expr": "sum(rate(djq_worker_errors_total[1m]))" }]
+      "targets": [{ "expr": "sum(rate(djq_worker_errors_total[1m]))" }],
+      "fieldConfig": {
+        "defaults": {
+          "links": [
+            {
+              "title": "View Worker Error Logs",
+              "url": "/explore?left={\"datasource\":\"Loki\",\"queries\":[{\"refId\":\"A\",\"expr\":\"{service=\\\"worker\\\"} | json | level=~\\\"(?i)ERROR|WARN\\\"\"}],\"range\":{\"from\":\"${__from}\",\"to\":\"${__to}\"}}",
+              "targetBlank": true
+            }
+          ]
+        }
+      }
     },
     {
       "type": "stat",
@@ -64,7 +75,18 @@
         { "expr": "sum(rate(djq_jobs_cancelled_total{job_type=~\"$job_type\"}[1m]))", "legendFormat": "Cancelled" },
         { "expr": "sum(rate(djq_jobs_retried_total{job_type=~\"$job_type\"}[1m]))", "legendFormat": "Retried" },
         { "expr": "sum(rate(djq_jobs_dlq_total{job_type=~\"$job_type\"}[1m]))", "legendFormat": "DLQ" }
-      ]
+      ],
+      "fieldConfig": {
+        "defaults": {
+          "links": [
+            {
+              "title": "View Failed/DLQ/Retried Logs",
+              "url": "/explore?left={\"datasource\":\"Loki\",\"queries\":[{\"refId\":\"A\",\"expr\":\"{service=\\\"worker\\\"} | json | status=~\\\"(?i)failed|retrying|dlq\\\"\"}],\"range\":{\"from\":\"${__from}\",\"to\":\"${__to}\"}}",
+              "targetBlank": true
+            }
+          ]
+        }
+      }
     },
     {
       "type": "timeseries",

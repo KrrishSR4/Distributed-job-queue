@@ -26,13 +26,35 @@
       "type": "stat",
       "title": "Global 4xx Rate",
       "gridPos": { "h": 4, "w": 4, "x": 4, "y": 0 },
-      "targets": [{ "expr": "sum(rate(djq_http_requests_total{status=~\"4..\"}[1m]))" }]
+      "targets": [{ "expr": "sum(rate(djq_http_requests_total{status=~\"4..\"}[1m]))" }],
+      "fieldConfig": {
+        "defaults": {
+          "links": [
+            {
+              "title": "View API 4xx Logs",
+              "url": "/explore?left={\"datasource\":\"Loki\",\"queries\":[{\"refId\":\"A\",\"expr\":\"{service=\\\"api\\\"} | json | status=~\\\"4..\\\"\"}],\"range\":{\"from\":\"${__from}\",\"to\":\"${__to}\"}}",
+              "targetBlank": true
+            }
+          ]
+        }
+      }
     },
     {
       "type": "stat",
       "title": "Global 5xx Rate",
       "gridPos": { "h": 4, "w": 4, "x": 8, "y": 0 },
-      "targets": [{ "expr": "sum(rate(djq_http_requests_total{status=~\"5..\"}[1m]))" }]
+      "targets": [{ "expr": "sum(rate(djq_http_requests_total{status=~\"5..\"}[1m]))" }],
+      "fieldConfig": {
+        "defaults": {
+          "links": [
+            {
+              "title": "View API 5xx/Error Logs",
+              "url": "/explore?left={\"datasource\":\"Loki\",\"queries\":[{\"refId\":\"A\",\"expr\":\"{service=\\\"api\\\"} | json | level=~\\\"(?i)ERROR|WARN\\\"\"}],\"range\":{\"from\":\"${__from}\",\"to\":\"${__to}\"}}",
+              "targetBlank": true
+            }
+          ]
+        }
+      }
     },
     {
       "type": "timeseries",

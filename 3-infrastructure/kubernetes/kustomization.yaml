@@ -22,3 +22,4 @@ configMapGenerator:
       - ../grafana/dashboards/overview.json
       - ../grafana/dashboards/api.json
       - ../grafana/dashboards/jobs-workers.json
+      - ../grafana/dashboards/logs.json
