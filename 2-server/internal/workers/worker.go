@@ -247,7 +247,7 @@ func (w *Worker) processJobPayload(ctx context.Context, payload *jobs.QueuePaylo
 		})
 		metrics.JobsCompletedTotal.WithLabelValues(string(job.Type)).Inc()
 	}
-	
+
 	statusStr := "success"
 	if procErr != nil {
 		statusStr = "error"

@@ -16,7 +16,7 @@ docker compose up -d
 We have created a dedicated integration runner script in Go that exercises the API. Run it from the root of the project:
 
 ```bash
-go run scripts/integration_runner.go
+go run scripts/integration/main.go
 ```
 
 ### What it Tests

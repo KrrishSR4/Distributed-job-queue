@@ -62,7 +62,7 @@ func main() {
 	fmt.Printf("Failed Requests: %d\n", failCount)
 	fmt.Printf("Average Request Latency: %v\n", avgDuration)
 	fmt.Printf("Requests Per Second: %.2f req/s\n", reqPerSec)
-	
+
 	if failCount > 0 {
 		fmt.Printf("WARNING: %d requests failed!\n", failCount)
 	}

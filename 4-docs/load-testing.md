@@ -4,7 +4,7 @@ This document records the load testing strategy and results for the Distributed 
 
 ## Methodology
 
-We use a custom Go concurrency script (`scripts/load_tester.go`) to simulate a high volume of job creation requests against the REST API. This ensures we test the API's ability to handle concurrent connections, insert jobs into PostgreSQL, and push events to Redis without external tool dependencies.
+We use a custom Go concurrency script (`scripts/load/main.go`) to simulate a high volume of job creation requests against the REST API. This ensures we test the API's ability to handle concurrent connections, insert jobs into PostgreSQL, and push events to Redis without external tool dependencies.
 
 ### Environment setup
 - **API Nodes**: 1 containerized instance
@@ -14,7 +14,7 @@ We use a custom Go concurrency script (`scripts/load_tester.go`) to simulate a h
 
 ## Running the Load Test
 ```bash
-go run scripts/load_tester.go
+go run scripts/load/main.go
 ```
 
 ## Results (Phase 8 Snapshot)

@@ -15,7 +15,7 @@ type PaginatedJobsResponse struct {
 func main() {
 	fmt.Println("Starting worker throughput test...")
 	url := "http://localhost:8080/api/v1/jobs"
-	
+
 	// Create a unique type to filter
 	jobType := fmt.Sprintf("worker_test_%d", time.Now().Unix())
 	jobCount := 50
@@ -49,7 +49,7 @@ func main() {
 		time.Sleep(200 * time.Millisecond)
 	}
 	duration := time.Since(startProcess)
-	
+
 	fmt.Printf("All jobs completed in %v\n", duration)
 	fmt.Printf("Worker Throughput: %.2f jobs/sec\n", float64(jobCount)/duration.Seconds())
 }

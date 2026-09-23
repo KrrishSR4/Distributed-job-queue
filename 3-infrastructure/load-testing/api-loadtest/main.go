@@ -65,7 +65,7 @@ func main() {
 		if i == 0 {
 			count += remainingReqs
 		}
-		
+
 		go func(count int) {
 			defer wg.Done()
 			client := &http.Client{
@@ -78,7 +78,7 @@ func main() {
 			for j := 0; j < count; j++ {
 				req, _ := http.NewRequest("POST", config.URL, bytes.NewBuffer(bodyBytes))
 				req.Header.Set("Content-Type", "application/json")
-				
+
 				if config.IdempotencyTest {
 					req.Header.Set("Idempotency-Key", "load-test-idempotent-key")
 				}
@@ -127,7 +127,7 @@ func main() {
 	fmt.Printf("Reqs/sec: %.2f\n", float64(config.Requests)/totalDuration.Seconds())
 	fmt.Printf("Successful requests: %d\n", successCount)
 	fmt.Printf("Failed requests: %d\n", errorCount)
-	
+
 	fmt.Printf("\n--- Status Codes ---\n")
 	for code, count := range statusCodes {
 		fmt.Printf("[%d] %d responses\n", code, count)
@@ -142,7 +142,7 @@ func main() {
 		p50 := durations[len(durations)/2]
 		p95 := durations[int(math.Floor(float64(len(durations))*0.95))]
 		p99 := durations[int(math.Floor(float64(len(durations))*0.99))]
-		
+
 		fmt.Printf("\n--- Latency ---\n")
 		fmt.Printf("Average: %v\n", avg)
 		fmt.Printf("p50: %v\n", p50)

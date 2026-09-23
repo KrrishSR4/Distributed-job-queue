@@ -101,10 +101,10 @@ func (db *Database) AutoMigrate(ctx context.Context) error {
 		if sqlScript == "" {
 			sqlScript = fallbackSQL
 		}
-		
+
 		migCtx, cancel := context.WithTimeout(ctx, 5*time.Second)
 		defer cancel()
-		
+
 		_, err := db.Pool.Exec(migCtx, sqlScript)
 		return err
 	}

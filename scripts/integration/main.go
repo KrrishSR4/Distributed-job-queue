@@ -53,7 +53,7 @@ func testBasicLifecycle() {
 func testRetryAndDLQ() {
 	fmt.Println("\n--- Testing Retry & DLQ ---")
 	jobID := createJob("test_fail", `{}`, "medium", 2, "")
-	
+
 	waitForStatus(jobID, "failed", 45) // Can take ~10-15s per retry due to base delay + scheduler poll
 	fmt.Println("Retry & DLQ Test Passed!")
 }
@@ -69,7 +69,7 @@ func testScheduler() {
 	fmt.Println("\n--- Testing Scheduler ---")
 	future := time.Now().Add(5 * time.Second).Format(time.RFC3339)
 	jobID := createJob("email", `{"job": "scheduled"}`, "medium", 3, future)
-	
+
 	status := getJobStatus(jobID)
 	if status != "scheduled" {
 		panic("Expected job to be scheduled")
@@ -84,7 +84,7 @@ func testCancellation() {
 	fmt.Println("\n--- Testing Cancellation ---")
 	future := time.Now().Add(10 * time.Second).Format(time.RFC3339)
 	jobID := createJob("email", `{"job": "cancel_me"}`, "medium", 3, future)
-	
+
 	// Cancel it
 	req, _ := http.NewRequest("POST", fmt.Sprintf("%s/jobs/%s/cancel", baseURL, jobID), nil)
 	client := &http.Client{}
