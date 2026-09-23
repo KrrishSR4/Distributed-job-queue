@@ -32,13 +32,15 @@ func main() {
 		"allowed_origin", cfg.AllowedOrigin,
 	)
 
-	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
-	defer cancel()
+	ctx := context.Background()
 
 	var repo jobs.Repository
 	db, err := database.NewPostgresPool(ctx, cfg.DatabaseURL)
 
-	if err == nil && db.IsHealthy(ctx) {
+	healthCtx, cancel := context.WithTimeout(ctx, 5*time.Second)
+	defer cancel()
+
+	if err == nil && db.IsHealthy(healthCtx) {
 		log.Info("Using PostgreSQL Database Repository")
 		repo = jobs.NewPostgresRepository(db.Pool)
 	} else {
@@ -54,7 +56,7 @@ func main() {
 	}
 
 	var queue jobs.Queue
-	if redisClient != nil && redisClient.IsHealthy(ctx) {
+	if redisClient != nil && redisClient.IsHealthy(healthCtx) {
 		log.Info("Using Redis Job Queue", "key", cfg.RedisQueueKey, "dlq_key", cfg.RedisDLQKey)
 		queue = jobs.NewRedisQueue(redisClient, cfg.RedisQueueKey, cfg.RedisDLQKey)
 	} else {

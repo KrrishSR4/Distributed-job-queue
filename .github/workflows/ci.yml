@@ -1,0 +1,73 @@
+name: CI
+
+on:
+  push:
+    branches: [ "main" ]
+  pull_request:
+    branches: [ "main" ]
+
+jobs:
+  test-backend:
+    name: Backend Test (Go)
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check out code
+        uses: actions/checkout@v3
+
+      - name: Set up Go
+        uses: actions/setup-go@v4
+        with:
+          go-version: '1.21'
+
+      - name: Go Format
+        working-directory: ./2-server
+        run: if [ "$(gofmt -s -l . | wc -l)" -gt 0 ]; then exit 1; fi
+
+      - name: Go Vet
+        working-directory: ./2-server
+        run: go vet ./...
+
+      - name: Go Test
+        working-directory: ./2-server
+        run: go test -v ./...
+
+  test-frontend:
+    name: Frontend Test (Angular)
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check out code
+        uses: actions/checkout@v3
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v3
+        with:
+          node-version: '22'
+          cache: 'npm'
+          cache-dependency-path: './1-client/package-lock.json'
+
+      - name: Install dependencies
+        working-directory: ./1-client
+        run: npm ci
+
+      - name: Build
+        working-directory: ./1-client
+        run: npm run build
+
+  validate-infrastructure:
+    name: Infrastructure Validation (Docker & K8s)
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check out code
+        uses: actions/checkout@v3
+
+      - name: Docker Compose Config Check
+        run: docker compose config -q
+
+      - name: Kubernetes Manifest Dry-Run
+        run: |
+          # Create a dummy namespace so that namespaced resources don't fail validation
+          kubectl create namespace distributed-job-queue --dry-run=client -o yaml > dummy-ns.yaml
+          kubectl apply -f dummy-ns.yaml --dry-run=client
+          
+          # Validate our kustomization
+          kubectl apply -k 3-infrastructure/kubernetes/ --dry-run=client
