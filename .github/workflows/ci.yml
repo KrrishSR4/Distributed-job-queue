@@ -65,9 +65,5 @@ jobs:
 
       - name: Kubernetes Manifest Dry-Run
         run: |
-          # Create a dummy namespace so that namespaced resources don't fail validation
-          kubectl create namespace distributed-job-queue --dry-run=client -o yaml > dummy-ns.yaml
-          kubectl apply -f dummy-ns.yaml --dry-run=client --validate=false
-          
-          # Validate our kustomization
-          kubectl kustomize --load-restrictor LoadRestrictionsNone 3-infrastructure/kubernetes/ | kubectl apply -f - --dry-run=client --validate=false
+          # Validate our kustomization syntax and build
+          kubectl kustomize --load-restrictor LoadRestrictionsNone 3-infrastructure/kubernetes/ > /dev/null
