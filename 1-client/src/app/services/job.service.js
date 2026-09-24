@@ -7,7 +7,7 @@ import { WebsocketService } from './websocket.service.js';
 })
 export class JobService {
   wsService = inject(WebsocketService);
-  apiUrl = '/api/v1/jobs';
+  apiUrl = 'https://djq-backend.onrender.com/api/v1/jobs';
 
   constructor() {
     this.jobsSubject = new BehaviorSubject([]);

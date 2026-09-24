@@ -8,7 +8,7 @@ export class WebsocketService {
   ws = null;
   reconnectAttempts = 0;
   maxReconnectAttempts = 5;
-  url = `ws://${window.location.host}/ws`;
+  url = 'wss://djq-backend.onrender.com/ws';
   
   events$ = new Subject();
   connectionStatus$ = new Subject(); // 'connected', 'connecting', 'disconnected'
