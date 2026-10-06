@@ -25,7 +25,7 @@
     "@angular/core": "^20.1.0",
     "@angular/forms": "^20.1.0",
     "@angular/platform-browser": "^20.1.0",
-    "@angular/router": "^20.1.0",
+    "@angular/router": "^20.3.32",
     "@tailwindcss/postcss": "^4.3.3",
     "echarts": "^6.1.0",
     "postcss": "^8.5.28",
